@@ -515,7 +515,7 @@ create policy "acesso_publico" on operacoes
       var html = selImgs.map(function(img, i) {
         return '<div class="img-thumb-wrap"><img src="' + img + '" alt="foto"><button class="img-thumb-del" onclick="event.stopPropagation();removeFormImg(' + i + ')">&#10005;</button></div>';
       }).join('');
-      html += '<div class="img-add-zone" onclick="document.getElementById('img-file').click()"><span style="font-size:22px">+</span><span>foto</span></div>';
+      html += '<div class="img-add-zone" onclick="document.getElementById(&quot;img-file&quot;).click()"><span style="font-size:22px">+</span><span>foto</span></div>';
       gallery.innerHTML = html;
     }
     function removeFormImg(idx) { selImgs.splice(idx, 1); renderFormImages(); }
@@ -575,7 +575,7 @@ create policy "acesso_publico" on operacoes
         ea = document.createElement('div'); ea.id = 'edit-img-actions'; ea.className = 'edit-img-actions';
         box.insertAdjacentElement('afterend', ea);
       }
-      ea.innerHTML = '<button class="edit-img-add-btn" onclick="document.getElementById('modal-img-file').click()">+ Adicionar foto</button>' +
+      ea.innerHTML = '<button class="edit-img-add-btn" onclick="document.getElementById(&quot;modal-img-file&quot;).click()">+ Adicionar foto</button>' +
         (imgs.length > 0 ? '<button class="edit-img-del-btn" onclick="removeEditImg()">&#128465; Remover atual</button>' : '');
     }
     function prevEditImg() { if (!editImgs || !editImgs.length) return; carouselIdx = (carouselIdx-1+editImgs.length) % editImgs.length; renderEditCarousel(); }
