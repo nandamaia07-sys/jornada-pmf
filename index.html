@@ -890,8 +890,8 @@ create policy "acesso_publico" on operacoes
     function dismissBanner() { document.getElementById('install-banner').classList.remove('show'); }
 
     /* INIT */
-    setupPWA();
-    renderFormImages();
+    try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
+    try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
     if (!SUPA_URL || !SUPA_KEY) { document.getElementById('cfg-overlay').classList.add('show'); } else { renderList(); }
   </script>
 </body>
