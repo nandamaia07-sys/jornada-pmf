@@ -227,6 +227,18 @@
     .cfg-copy-btn { margin-top:8px; padding:8px 14px; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
     .cfg-copy-btn:hover { border-color:var(--blue); color:var(--blue); }
 
+    /* CATEGORIAS */
+    .cat-wrap { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .tog.cat.on { background:rgba(168,85,247,.15); border-color:#a855f7; color:#a855f7; }
+    .bdg.cat-dt  { background:var(--blue-dim); color:var(--blue); }
+    .bdg.cat-ac  { background:rgba(251,191,36,.12); color:#fbbf24; }
+    .bdg.cat-fii { background:rgba(168,85,247,.12); color:#a855f7; }
+
+    /* FILTROS DE CATEGORIA */
+    .filter-wrap { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+    .filter-btn { padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:var(--surface2); color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; }
+    .filter-btn.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+
     /* DESKTOP */
     @media (min-width: 900px) {
       .hdr { padding:12px 24px; }
@@ -234,7 +246,7 @@
       .main { padding-bottom:0; overflow:hidden; }
       .bnav { display:none; }
       .toast { bottom:24px; }
-      #tab-ops { display:grid !important; grid-template-columns:420px 1fr; height:100%; overflow:hidden; }
+      #tab-ops.active { display:grid; grid-template-columns:420px 1fr; height:100%; overflow:hidden; }
       .form-wrap { overflow-y:auto; height:100%; border-right:1px solid var(--border); border-bottom:none; padding:20px; }
       .img-zone { height:150px; }
       .list-wrap { overflow-y:auto; height:100%; padding:20px; }
@@ -337,8 +349,16 @@ create policy "acesso_publico" on operacoes
           <span class="img-zone-txt">Clique ou toque para adicionar print</span>
         </div>
         <div class="f-row">
-          <label class="f-lbl" for="inp-par">Par de Moeda</label>
-          <input type="text" class="f-inp" id="inp-par" placeholder="ex: WINM25  EURUSD  BTC">
+          <label class="f-lbl">Categoria</label>
+          <div class="cat-wrap">
+            <button class="tog cat" id="tog-dt"  onclick="pickCat('daytrade')">&#128178; Day Trade</button>
+            <button class="tog cat" id="tog-ac"  onclick="pickCat('acoes')">&#128200; A&#231;&#245;es</button>
+            <button class="tog cat" id="tog-fii" onclick="pickCat('fiis')">&#127963; FIIs</button>
+          </div>
+        </div>
+        <div class="f-row">
+          <label class="f-lbl" for="inp-par">Par / Ativo</label>
+          <input type="text" class="f-inp" id="inp-par" placeholder="ex: WINM25  EURUSD  PETR4  MXRF11">
         </div>
         <div class="f-row">
           <label class="f-lbl">Dire&#231;&#227;o da Entrada</label>
@@ -371,6 +391,12 @@ create policy "acesso_publico" on operacoes
         <button class="btn-save" onclick="saveOp()">SALVAR OPERA&#199;&#195;O</button>
       </div>
       <div class="list-wrap">
+        <div class="filter-wrap">
+          <button class="filter-btn active" data-filter="all"      onclick="setFilter('all',this)">Todos</button>
+          <button class="filter-btn"        data-filter="daytrade" onclick="setFilter('daytrade',this)">&#128178; Day Trade</button>
+          <button class="filter-btn"        data-filter="acoes"    onclick="setFilter('acoes',this)">&#128200; A&#231;&#245;es</button>
+          <button class="filter-btn"        data-filter="fiis"     onclick="setFilter('fiis',this)">&#127963; FIIs</button>
+        </div>
         <div class="list-head" id="list-head">Hist&#243;rico</div>
         <div id="op-list"></div>
       </div>
@@ -514,7 +540,7 @@ create policy "acesso_publico" on operacoes
         });
       });
     }
-    function dbList()     { return supaReq('operacoes?select=id,par,dir,res,valor,moeda,nota,thumb,ts&order=ts.desc'); }
+    function dbList()     { return supaReq('operacoes?select=id,par,dir,res,categoria,valor,moeda,nota,thumb,ts&order=ts.desc'); }
     function dbOne(id)    { return supaReq('operacoes?id=eq.' + id + '&select=*'); }
     function dbAdd(data)  { return supaReq('operacoes', { method: 'POST', body: JSON.stringify(data) }); }
     function dbUpd(id, d) { return supaReq('operacoes?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(d), headers: { 'Prefer': 'return=minimal' } }); }
@@ -550,8 +576,9 @@ create policy "acesso_publico" on operacoes
     }
 
     /* STATE */
-    var selImg = null, selDir = null, selRes = null, selCur = null;
+    var selImg = null, selDir = null, selRes = null, selCur = null, selCat = null;
     var modalId = null, editMode = false, editImg = null;
+    var filterCat = 'all';
     var loadCount = 0;
 
     /* LOADING / TOAST */
@@ -589,6 +616,18 @@ create policy "acesso_publico" on operacoes
     function pickDir(val) { selDir = val; document.getElementById('tog-compra').classList.toggle('on', val === 'compra'); document.getElementById('tog-venda').classList.toggle('on', val === 'venda'); }
     function pickRes(val) { selRes = val; document.getElementById('tog-gain').classList.toggle('on', val === 'gain'); document.getElementById('tog-stop').classList.toggle('on', val === 'stop'); }
     function pickCur(val) { selCur = val; document.getElementById('tog-brl').classList.toggle('on-cur', val === 'brl'); document.getElementById('tog-usd').classList.toggle('on-cur', val === 'usd'); }
+    function pickCat(val) {
+      selCat = val;
+      ['tog-dt','tog-ac','tog-fii'].forEach(function(id) { document.getElementById(id).classList.remove('on'); });
+      var map = { daytrade:'tog-dt', acoes:'tog-ac', fiis:'tog-fii' };
+      if (map[val]) document.getElementById(map[val]).classList.add('on');
+    }
+    function setFilter(val, btn) {
+      filterCat = val;
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderList();
+    }
     function fmtValor(valor, moeda) {
       var num = parseFloat(valor); if (isNaN(num) || num === 0) return '';
       if (moeda === 'usd') return 'US$ ' + num.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -598,8 +637,9 @@ create policy "acesso_publico" on operacoes
     /* SAVE */
     function saveOp() {
       var par = document.getElementById('inp-par').value.trim().toUpperCase();
-      if (!par)    { showToast('Informe o par de moeda.', 'error'); return; }
-      if (!selDir) { showToast('Selecione a direção.', 'error'); return; }
+      if (!par)    { showToast('Informe o par / ativo.', 'error'); return; }
+      if (!selCat) { showToast('Selecione a categoria.', 'error'); return; }
+      if (!selDir) { showToast('Selecione a dire\u00e7\u00e3o.', 'error'); return; }
       if (!selRes) { showToast('Selecione o resultado.', 'error'); return; }
       var valorRaw = parseFloat(document.getElementById('inp-valor').value);
       var nota = document.getElementById('inp-nota').value.trim();
@@ -609,17 +649,17 @@ create policy "acesso_publico" on operacoes
         imgData ? makeThumbnail(imgData) : Promise.resolve(null)
       ]).then(function(results) {
         var thumb = results[0];
-        return dbAdd({ par: par, dir: selDir, res: selRes, valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota, thumb: thumb, imagem: imgData, ts: new Date().toISOString() });
+        return dbAdd({ par: par, dir: selDir, res: selRes, categoria: selCat, valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota, thumb: thumb, imagem: imgData, ts: new Date().toISOString() });
       }).then(function() {
-        resetForm(); showToast('Operação salva!', 'success'); return renderList();
+        resetForm(); showToast('Opera\u00e7\u00e3o salva!', 'success'); return renderList();
       }).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); })
         .finally(function() { setLoading(false); });
     }
     function resetForm() {
       document.getElementById('inp-par').value = ''; document.getElementById('inp-nota').value = ''; document.getElementById('inp-valor').value = '';
-      document.getElementById('img-file').value = ''; selImg = null; selDir = null; selRes = null; selCur = null;
+      document.getElementById('img-file').value = ''; selImg = null; selDir = null; selRes = null; selCur = null; selCat = null;
       clearFormImage();
-      ['tog-compra','tog-venda','tog-gain','tog-stop'].forEach(function(id) { document.getElementById(id).classList.remove('on'); });
+      ['tog-compra','tog-venda','tog-gain','tog-stop','tog-dt','tog-ac','tog-fii'].forEach(function(id) { document.getElementById(id).classList.remove('on'); });
       ['tog-brl','tog-usd'].forEach(function(id) { document.getElementById(id).classList.remove('on-cur'); });
     }
 
@@ -629,25 +669,29 @@ create policy "acesso_publico" on operacoes
       setLoading(true);
       return dbList().then(function(ops) {
         setLoading(false);
-        head.textContent = 'Histórico — ' + ops.length + ' operaç' + (ops.length === 1 ? 'ão' : 'ões');
-        if (!ops.length) { list.innerHTML = '<div class="empty"><div class="empty-ico">&#128202;</div><p>Nenhuma operação registrada ainda.</p></div>'; return; }
-        list.innerHTML = ops.map(function(op) {
+        var filtered = filterCat === 'all' ? ops : ops.filter(function(o) { return o.categoria === filterCat; });
+        head.textContent = 'Hist\u00f3rico \u2014 ' + filtered.length + ' opera\u00e7' + (filtered.length === 1 ? '\u00e3o' : '\u00f5es');
+        if (!filtered.length) { list.innerHTML = '<div class="empty"><div class="empty-ico">&#128202;</div><p>Nenhuma opera\u00e7\u00e3o nesta categoria ainda.</p></div>'; return; }
+        list.innerHTML = filtered.map(function(op) {
           var d = new Date(op.ts);
           var date = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
           var edge  = op.res === 'gain' ? 'bull' : 'bear';
           var thumb = op.thumb ? '<div class="card-thumb"><img src="' + op.thumb + '" alt="print"></div>' : '<div class="card-thumb">&#128202;</div>';
           var dirB  = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : '<span class="bdg venda">&#9660; VENDA</span>';
           var resB  = op.res === 'gain'   ? '<span class="bdg bull">&#9989; GAIN</span>'    : '<span class="bdg bear">&#10060; STOP</span>';
+          var catLabel = { daytrade:'&#128178; Day Trade', acoes:'&#128200; A\u00e7\u00f5es', fiis:'&#127963; FIIs' };
+          var catClass = { daytrade:'cat-dt', acoes:'cat-ac', fiis:'cat-fii' };
+          var catB  = op.categoria ? '<span class="bdg ' + (catClass[op.categoria]||'') + '">' + (catLabel[op.categoria]||op.categoria) + '</span>' : '';
           var vf    = fmtValor(op.valor, op.moeda);
-          var vSnip = vf ? '<div class="card-valor ' + edge + '">' + (op.res === 'gain' ? '+' : '−') + ' ' + vf + '</div>' : '';
+          var vSnip = vf ? '<div class="card-valor ' + edge + '">' + (op.res === 'gain' ? '+' : '\u2212') + ' ' + vf + '</div>' : '';
           var nSnip = op.nota ? '<div class="card-note">' + escHtml(op.nota) + '</div>' : '';
           return '<div class="card" onclick="openModal(' + op.id + ')">' +
                  '<div class="card-edge ' + edge + '"></div>' + thumb +
                  '<div class="card-body"><div class="card-pair">' + escHtml(op.par) + '</div>' +
-                 '<div class="card-badges">' + dirB + resB + '</div>' +
+                 '<div class="card-badges">' + catB + dirB + resB + '</div>' +
                  '<div class="card-date">' + date + '</div>' + vSnip + nSnip + '</div></div>';
         }).join('');
-      }).catch(function(e) { setLoading(false); showToast('Erro ao carregar. Verifique a conexão.', 'error'); });
+      }).catch(function(e) { setLoading(false); showToast('Erro ao carregar. Verifique a conex\u00e3o.', 'error'); });
     }
 
     /* MODAL */
@@ -664,7 +708,10 @@ create policy "acesso_publico" on operacoes
         var ov = document.getElementById('img-edit-ov'); if (ov) ov.remove();
         var dirH = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : '<span class="bdg venda">&#9660; VENDA</span>';
         var resH = op.res === 'gain'   ? '<span class="bdg bull">&#9989; GAIN</span>'    : '<span class="bdg bear">&#10060; STOP</span>';
-        document.getElementById('m-badges').innerHTML = dirH + resH;
+        var catLM = { daytrade:'&#128178; Day Trade', acoes:'&#128200; A\u00e7\u00f5es', fiis:'&#127963; FIIs' };
+        var catCM = { daytrade:'cat-dt', acoes:'cat-ac', fiis:'cat-fii' };
+        var catH  = op.categoria ? '<span class="bdg ' + (catCM[op.categoria]||'') + '">' + (catLM[op.categoria]||op.categoria) + '</span>' : '';
+        document.getElementById('m-badges').innerHTML = catH + dirH + resH;
         var vs = document.getElementById('m-valor-sec'), vf = fmtValor(op.valor, op.moeda);
         if (vf) {
           vs.style.display = 'block';
