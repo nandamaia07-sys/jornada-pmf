@@ -124,6 +124,12 @@
     /* STATS */
     .stats-wrap { padding:14px; }
     .stats-conta-info { text-align:center; font-size:12px; font-weight:700; color:var(--bull); background:var(--bull-dim); border:1px solid var(--bull); border-radius:10px; padding:10px 14px; margin-bottom:16px; }
+    .stats-actions-row { display:flex; gap:8px; margin-bottom:16px; }
+    .stats-action-btn { flex:1; padding:10px 6px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text); font-size:11px; font-weight:700; cursor:pointer; text-align:center; transition:all .15s; }
+    .stats-action-btn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); }
+    .stats-action-btn:disabled { opacity:.3; cursor:not-allowed; }
+    .stats-action-btn.danger { border-color:var(--bear); color:var(--bear); background:var(--bear-dim); }
+    .stats-action-btn.danger:hover { opacity:.85; }
     .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
     .scard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
     .scard.full { grid-column:1/-1; }
@@ -577,6 +583,11 @@ create policy "acesso_publico_operacional" on operacional_entries
     <div class="tab" id="tab-stats">
       <div class="stats-wrap">
         <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
+        <div class="stats-actions-row">
+          <button class="stats-action-btn" id="stats-undo-btn" onclick="undoStats()" disabled>&#8630; Voltar</button>
+          <button class="stats-action-btn" id="stats-redo-btn" onclick="redoStats()" disabled>&#8631; Refazer</button>
+          <button class="stats-action-btn danger" onclick="resetStatsAll()">&#128465;&#65039; Reiniciar</button>
+        </div>
         <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
         <div id="s-content">
           <div class="stats-grid">
@@ -1251,11 +1262,77 @@ create policy "acesso_publico_operacional" on operacional_entries
     }
 
     /* STATISTICS */
+    /* UNDO/REDO/RESET DAS ESTATISTICAS */
+    var statsSnapshotBefore = null;
+    var statsSnapshotAfter = null;
+    function captureStatsSnapshot() {
+      return dbList().then(function(ops) {
+        return ops.filter(function(o) { return o.origem === 'exportado'; }).map(function(o) {
+          return { par:o.par, dir:o.dir, res:o.res, categoria:o.categoria, conta:o.conta, valor:o.valor, moeda:o.moeda, nota:o.nota, thumb:o.thumb, imagem:o.imagem, imagens:o.imagens, origem:o.origem, ts:o.ts };
+        });
+      });
+    }
+    function replaceStatsWithSnapshot(snapshot) {
+      return dbList().then(function(ops) {
+        var toDelete = ops.filter(function(o) { return o.origem === 'exportado'; });
+        return Promise.all(toDelete.map(function(o) { return dbDel2(o.id); }));
+      }).then(function() {
+        if (!snapshot || !snapshot.length) return Promise.resolve();
+        return Promise.all(snapshot.map(function(r) { return dbAdd(r); }));
+      });
+    }
+    function updateStatsUndoButtons() {
+      var undoBtn = document.getElementById('stats-undo-btn');
+      var redoBtn = document.getElementById('stats-redo-btn');
+      if (undoBtn) undoBtn.disabled = !statsSnapshotBefore;
+      if (redoBtn) redoBtn.disabled = !statsSnapshotAfter;
+    }
+    function undoStats() {
+      if (!statsSnapshotBefore) return;
+      setLoading(true);
+      captureStatsSnapshot().then(function(current) {
+        statsSnapshotAfter = current;
+        return replaceStatsWithSnapshot(statsSnapshotBefore);
+      }).then(function() {
+        statsSnapshotBefore = null;
+        showToast('\u00daltima altera\u00e7\u00e3o desfeita.', 'success');
+        updateStats();
+      }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function redoStats() {
+      if (!statsSnapshotAfter) return;
+      setLoading(true);
+      captureStatsSnapshot().then(function(current) {
+        statsSnapshotBefore = current;
+        return replaceStatsWithSnapshot(statsSnapshotAfter);
+      }).then(function() {
+        statsSnapshotAfter = null;
+        showToast('Altera\u00e7\u00e3o refeita.', 'success');
+        updateStats();
+      }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function resetStatsAll() {
+      showGenConfirm('Reiniciar estat\u00edsticas?', 'Isso vai apagar TODOS os dados exportados para as estat\u00edsticas. Voc\u00ea pode desfazer com o bot\u00e3o Voltar logo em seguida.', function() {
+        setLoading(true);
+        captureStatsSnapshot().then(function(before) {
+          statsSnapshotBefore = before;
+          statsSnapshotAfter = [];
+          return replaceStatsWithSnapshot([]);
+        }).then(function() {
+          showToast('Estat\u00edsticas reiniciadas!', 'success');
+          updateStats();
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
     function updateStats() {
       var empty = document.getElementById('s-empty'), cont = document.getElementById('s-content');
       setLoading(true);
       dbList().then(function(ops) {
         setLoading(false);
+        updateStatsUndoButtons();
         var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
         var filtered = exportados;
         if (!filtered.length) { empty.style.display = 'block'; cont.style.display = 'none'; return; }
@@ -1276,7 +1353,7 @@ create policy "acesso_publico_operacional" on operacional_entries
         document.getElementById('s-streak-txt').innerHTML = '<span style="color:' + (isG ? 'var(--bull)' : 'var(--bear)') + '">' + streak + ' ' + (isG ? 'GAIN' : 'STOP') + (streak > 1 ? 'S' : '') + ' seguido' + (streak > 1 ? 's' : '') + '</span>';
         document.getElementById('s-chart-wrap').style.display = 'block'; document.getElementById('s-monthly-wrap').style.display = 'block';
         renderEquity(chrono); renderMonthlyChart(chrono);
-      }).catch(function() { setLoading(false); });
+      }).catch(function() { setLoading(false); updateStatsUndoButtons(); });
     }
     function renderEquity(chrono) {
       var pts = [0]; chrono.forEach(function(op) { pts.push(pts[pts.length-1] + (op.res === 'gain' ? 1 : -1)); });
@@ -1794,7 +1871,11 @@ create policy "acesso_publico_operacional" on operacional_entries
       }
       if (!records.length) { showToast('Preencha ao menos uma entrada de Gain ou Loss.', 'error'); return; }
       setLoading(true);
-      Promise.all(records.map(function(r) { return dbAdd(r); }))
+      captureStatsSnapshot().then(function(before) {
+        statsSnapshotBefore = before;
+        statsSnapshotAfter = null;
+        return Promise.all(records.map(function(r) { return dbAdd(r); }));
+      })
         .then(function() {
           showToast('Trade do dia exportado para as estat\u00edsticas!', 'success');
           return dbMetaSet({ gains: [], losses: [] });
