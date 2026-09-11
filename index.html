@@ -295,6 +295,16 @@
     .cmp-metames-del { width:34px; height:34px; flex-shrink:0; border-radius:8px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .cmp-add-meta-btn { width:100%; padding:11px; background:var(--blue-dim); border:1px dashed var(--blue); color:var(--blue); border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; }
     .cmp-add-meta-btn:hover { opacity:.85; }
+    .cmp-ganhos-grid { display:flex; flex-direction:column; gap:8px; }
+    .cmp-ganho-row { display:flex; align-items:center; gap:8px; }
+    .cmp-ganho-lbl { width:52px; flex-shrink:0; font-size:12px; font-weight:800; color:#9a9ac2; text-transform:uppercase; letter-spacing:.3px; }
+    .cmp-ganho-inp { flex:1; background:#1c1c34; border:1px solid #31314f; border-radius:8px; padding:10px 12px; color:var(--text); font-family:var(--mono); font-weight:700; font-size:13px; outline:none; text-align:right; }
+    .cmp-ganho-inp:focus { border-color:var(--blue); }
+    .cmp-ganho-inp::placeholder { color:var(--muted); }
+    .cmp-ganho-inp.pos { color:var(--bull); border-color:var(--bull); }
+    .cmp-ganho-inp.neg { color:var(--bear); border-color:var(--bear); }
+    .cmp-ganho-del { width:34px; height:34px; flex-shrink:0; border-radius:8px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .cmp-ganho-del:hover { opacity:.85; }
 
     /* OPERACIONAL */
     .op-method-layout { display:flex; flex-direction:column; gap:16px; }
@@ -424,6 +434,15 @@ create table operacional_entries (
 );
 alter table operacional_entries enable row level security;
 create policy "acesso_publico_operacional" on operacional_entries
+  for all using (true) with check (true);
+
+create table ganhos_mensais (
+  mes int primary key,
+  valor numeric,
+  updated_at timestamptz default now()
+);
+alter table ganhos_mensais enable row level security;
+create policy "acesso_publico_ganhos" on ganhos_mensais
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -557,6 +576,15 @@ create policy "acesso_publico_operacional" on operacional_entries
           <div class="cmp-total-row" style="margin-top:12px">
             <span>Total das metas</span>
             <strong id="ops-metames-total">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Ganhos por M&#234;s</div>
+          <div class="cmp-ganhos-grid" id="ops-ganhos-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total do ano</span>
+            <strong id="ops-ganhos-total">R$ 0,00</strong>
           </div>
         </div>
 
@@ -789,6 +817,15 @@ create policy "acesso_publico_operacional" on operacional_entries
           <div class="cmp-total-row" style="margin-top:12px">
             <span>Total das metas</span>
             <strong id="cmp-metames-total">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Ganhos por M&#234;s</div>
+          <div class="cmp-ganhos-grid" id="cmp-ganhos-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total do ano</span>
+            <strong id="cmp-ganhos-total">R$ 0,00</strong>
           </div>
         </div>
 
@@ -1438,6 +1475,12 @@ create policy "acesso_publico_operacional" on operacional_entries
     function dbMetamesUpd(id, fields) { return supaReq('metas_mes?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
     function dbMetamesDel(id) { return supaReq('metas_mes?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
+    function dbGanhosList() { return supaReq('ganhos_mensais?select=mes,valor'); }
+    function dbGanhoUpsert(mes, valor) {
+      return supaReq('ganhos_mensais?on_conflict=mes', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ mes: mes, valor: valor }]) });
+    }
+    function dbGanhoDelete(mes) { return supaReq('ganhos_mensais?mes=eq.' + mes, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
     function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
     function dbOpmUpd(id, fields) { return supaReq('operacional_entries?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
@@ -1959,10 +2002,86 @@ create policy "acesso_publico_operacional" on operacional_entries
       });
     }
 
+    /* GANHOS POR MES (nuvem: ganhos_mensais) */
+    var ganhosCache = {};
+    var MESES_LBL = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+    function loadGanhosFromCloud() {
+      return dbGanhosList().then(function(rows) {
+        ganhosCache = {};
+        (rows || []).forEach(function(r) { ganhosCache[r.mes] = r.valor; });
+      }).catch(function(e) { showToast('Erro ao carregar ganhos: ' + e.message, 'error'); });
+    }
+    function renderGanhosMensais() {
+      ['cmp','ops'].forEach(function(px) {
+        var grid = document.getElementById(px + '-ganhos-grid');
+        if (!grid) return;
+        var html = '';
+        for (var m = 1; m <= 12; m++) {
+          var v = ganhosCache[m];
+          var vn = parseFloat(v);
+          var cls = !isNaN(vn) && vn !== 0 ? (vn > 0 ? 'pos' : 'neg') : '';
+          html += '<div class="cmp-ganho-row">' +
+            '<span class="cmp-ganho-lbl">' + MESES_LBL[m-1] + '</span>' +
+            '<input type="number" class="cmp-ganho-inp ' + cls + '" id="' + px + '-ganho-' + m + '" placeholder="0.00 (use - para perda)" step="0.01" value="' + (v != null ? v : '') + '" oninput="updGanhoMes(\'' + px + '\',' + m + ',this.value)">' +
+            '<button class="cmp-ganho-del" onclick="delGanhoMes(' + m + ')" title="Excluir">&#10005;</button>' +
+          '</div>';
+        }
+        grid.innerHTML = html;
+      });
+      updateGanhosTotal();
+    }
+    function updateGanhosTotal() {
+      var total = 0;
+      for (var m = 1; m <= 12; m++) { var v = parseFloat(ganhosCache[m]); if (!isNaN(v)) total += v; }
+      ['cmp','ops'].forEach(function(px) {
+        var t = document.getElementById(px + '-ganhos-total');
+        if (!t) return;
+        t.textContent = (total >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(total));
+        t.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
+      });
+    }
+    var ganhoDebounceFns = {};
+    function updGanhoMes(px, mes, val) {
+      ganhosCache[mes] = val === '' ? null : val;
+      var num = parseFloat(val);
+      var cls = !isNaN(num) && num !== 0 ? (num > 0 ? 'pos' : 'neg') : '';
+      var thisEl = document.getElementById(px + '-ganho-' + mes);
+      if (thisEl) thisEl.className = 'cmp-ganho-inp ' + cls;
+      var otherPx = px === 'cmp' ? 'ops' : 'cmp';
+      var otherEl = document.getElementById(otherPx + '-ganho-' + mes);
+      if (otherEl) { otherEl.value = val; otherEl.className = 'cmp-ganho-inp ' + cls; }
+      updateGanhosTotal();
+      var key = 'ganho_' + mes;
+      if (!ganhoDebounceFns[key]) {
+        ganhoDebounceFns[key] = debounce(function() {
+          var v = ganhosCache[mes];
+          var numToSave = parseFloat(v);
+          if (v === null || v === '' || v === undefined || isNaN(numToSave)) {
+            dbGanhoDelete(mes).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+          } else {
+            dbGanhoUpsert(mes, numToSave).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+          }
+        }, 600);
+      }
+      ganhoDebounceFns[key]();
+    }
+    function delGanhoMes(mes) {
+      showGenConfirm('Excluir o valor deste m\u00eas?', 'Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbGanhoDelete(mes).then(function() {
+          delete ganhosCache[mes];
+          renderGanhosMensais();
+          showToast('Valor removido.', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+
     function refreshMetaPanel() {
-      return Promise.all([loadCmpMetaFromCloud(), loadMetamesFromCloud()]).then(function() {
+      return Promise.all([loadCmpMetaFromCloud(), loadMetamesFromCloud(), loadGanhosFromCloud()]).then(function() {
         calcCmpMeta('cmp');
         renderCmpMetasMes();
+        renderGanhosMensais();
       });
     }
 
@@ -1976,12 +2095,14 @@ create policy "acesso_publico_operacional" on operacional_entries
           if (el) el.value = nome;
         }).catch(function() {}),
         loadCmpMetaFromCloud(),
-        loadMetamesFromCloud()
+        loadMetamesFromCloud(),
+        loadGanhosFromCloud()
       ]).then(function() {
         setLoading(false);
         renderCmpDiasGrid();
         calcCmpMeta('cmp');
         renderCmpMetasMes();
+        renderGanhosMensais();
       }).catch(function(e) {
         setLoading(false);
         showToast('Erro ao carregar: ' + e.message, 'error');
