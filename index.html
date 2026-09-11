@@ -23,7 +23,7 @@
     body { display:flex; flex-direction:column; }
     .loading-bar { position:fixed; top:0; left:0; right:0; height:3px; background:var(--blue); z-index:999; display:none; animation:lbar 1.2s ease-in-out infinite; }
     @keyframes lbar { 0%{transform:translateX(-100%) scaleX(.3)} 50%{transform:translateX(0) scaleX(.6)} 100%{transform:translateX(100%) scaleX(.3)} }
-    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; z-index:400; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,.4); }
+    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; z-index:400; opacity:0; transition:opacity .25s; pointer-events:none; white-space:normal; max-width:90vw; width:max-content; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.4); }
     .toast.show { opacity:1; } .toast.success { border-color:var(--bull); color:var(--bull); } .toast.error { border-color:var(--bear); color:var(--bear); }
     .hdr { flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:10px; }
     .hdr-logo { font-size:20px; } .hdr h1 { font-size:16px; font-weight:700; letter-spacing:.4px; flex:1; } .hdr h1 em { font-style:normal; color:var(--blue); }
@@ -68,7 +68,7 @@
     .edit-img-add-btn:hover { border-color:var(--blue); color:var(--blue); }
     .edit-img-del-btn { flex:1; padding:9px; border:1px solid var(--bear-dim); border-radius:8px; background:transparent; color:var(--bear); font-size:12px; font-weight:700; cursor:pointer; text-align:center; }
     .f-row { margin-bottom:13px; }
-    .f-lbl { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .f-lbl { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#9a9ac2; font-weight:700; margin-bottom:6px; }
     .f-inp { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:12px 13px; color:var(--text); font-family:var(--mono); font-size:16px; font-weight:700; outline:none; text-transform:uppercase; }
     .f-inp:focus { border-color:var(--blue); }
     .f-inp::placeholder { color:var(--muted); font-weight:400; font-family:var(--ui); text-transform:none; }
@@ -123,9 +123,7 @@
     .bnav-btn .ico { font-size:19px; } .bnav-btn.active { color:var(--blue); }
     /* STATS */
     .stats-wrap { padding:14px; }
-    .stats-conta-filter { display:flex; gap:8px; margin-bottom:16px; }
-    .sconta-btn { flex:1; padding:10px 6px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; text-align:center; }
-    .sconta-btn.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+    .stats-conta-info { text-align:center; font-size:12px; font-weight:700; color:var(--bull); background:var(--bull-dim); border:1px solid var(--bull); border-radius:10px; padding:10px 14px; margin-bottom:16px; }
     .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
     .scard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
     .scard.full { grid-column:1/-1; }
@@ -198,6 +196,120 @@
     .cfg-sql { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--bull); white-space:pre; overflow-x:auto; line-height:1.7; }
     .cfg-copy-btn { margin-top:8px; padding:8px 14px; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
     .cfg-copy-btn:hover { border-color:var(--blue); color:var(--blue); }
+    /* COMPROMISSO COM DEUS */
+    .cmp-wrap { padding:14px; max-width:640px; margin:0 auto; }
+    .cmp-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 18px; margin-bottom:14px; }
+    .cmp-card-highlight { border-color:#fbbf24; background:rgba(251,191,36,.06); }
+    .cmp-hero { text-align:center; background:linear-gradient(160deg, var(--surface), var(--surface2)); }
+    .cmp-hero-ico { font-size:36px; margin-bottom:10px; }
+    .cmp-title { font-size:18px; font-weight:900; letter-spacing:.3px; line-height:1.35; margin-bottom:8px; }
+    .cmp-sub { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.5; }
+    .cmp-meta-row { display:flex; gap:10px; justify-content:center; margin-bottom:14px; }
+    .cmp-meta { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:8px 16px; text-align:center; }
+    .cmp-meta-lbl { display:block; font-size:9px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:3px; }
+    .cmp-meta-val { display:block; font-size:14px; font-weight:800; font-family:var(--mono); color:var(--blue); }
+    .cmp-proposito { font-size:13px; line-height:1.6; margin-bottom:16px; }
+    .cmp-verse { background:var(--surface2); border-left:3px solid var(--blue); border-radius:8px; padding:14px 16px; font-size:14px; font-style:italic; line-height:1.6; color:var(--text); text-align:left; }
+    .cmp-verse-ref { display:block; margin-top:8px; font-size:11px; font-style:normal; font-weight:800; color:var(--blue); text-transform:uppercase; letter-spacing:.5px; }
+    .cmp-verse-sm { font-size:13px; padding:12px 14px; margin:8px 0; }
+    .cmp-verse-lg { font-size:16px; padding:18px; border-left-color:#fbbf24; }
+    .cmp-verse-lg .cmp-verse-ref { color:#fbbf24; }
+    .cmp-sec-title { font-size:14px; font-weight:800; margin-bottom:14px; letter-spacing:.2px; }
+    .cmp-p { font-size:13.5px; line-height:1.7; color:var(--text); margin-bottom:10px; }
+    .cmp-quote { font-size:15px; font-weight:700; font-style:italic; color:#fbbf24; margin-bottom:14px; line-height:1.5; }
+    .cmp-list { list-style:none; margin:8px 0; }
+    .cmp-list li { font-size:13px; line-height:1.6; padding:6px 0 6px 26px; position:relative; color:var(--text); border-bottom:1px solid var(--border); }
+    .cmp-list li:last-child { border-bottom:none; }
+    .cmp-list li::before { content:'\2713'; position:absolute; left:0; top:6px; color:var(--bull); font-weight:900; }
+    .cmp-list-red li::before { content:'\1F534'; font-size:10px; top:8px; }
+    .cmp-list-q li::before { content:'?'; color:var(--blue); }
+    .cmp-rule { text-align:center; font-size:15px; font-weight:900; letter-spacing:1px; color:var(--bear); background:var(--bear-dim); border:1px solid var(--bear); border-radius:10px; padding:14px; margin-top:14px; }
+    /* progress ring */
+    .cmp-progress-wrap { display:flex; align-items:center; gap:20px; margin-bottom:16px; flex-wrap:wrap; }
+    .cmp-progress-ring-box { position:relative; width:110px; height:110px; flex-shrink:0; }
+    .cmp-ring-svg { width:100%; height:100%; }
+    #cmp-ring-fg { stroke-dasharray:264; stroke-dashoffset:264; transition:stroke-dashoffset .5s ease, stroke .3s; }
+    .cmp-ring-label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .cmp-ring-label span { font-size:22px; font-weight:900; font-family:var(--mono); }
+    .cmp-ring-label small { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .cmp-progress-stats { display:flex; flex-direction:column; gap:8px; flex:1; min-width:140px; }
+    .cmp-pstat { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); border-radius:8px; padding:8px 12px; }
+    .cmp-pstat-val { font-size:16px; font-weight:900; font-family:var(--mono); }
+    .cmp-pstat-lbl { font-size:11px; color:var(--muted); }
+    .cmp-hint { font-size:11px; color:var(--muted); text-align:center; margin-bottom:14px; }
+    .cmp-days-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:7px; margin-bottom:16px; }
+    .cmp-day { aspect-ratio:1; border-radius:9px; background:var(--surface2); border:1.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; -webkit-tap-highlight-color:transparent; }
+    .cmp-day-num { font-size:10px; color:var(--muted); font-weight:700; }
+    .cmp-day-mark { font-size:15px; line-height:1; margin-top:1px; }
+    .cmp-day.ok { background:var(--bull-dim); border-color:var(--bull); }
+    .cmp-day.ok .cmp-day-num { color:var(--bull); }
+    .cmp-day.fail { background:var(--bear-dim); border-color:var(--bear); }
+    .cmp-day.fail .cmp-day-num { color:var(--bear); }
+    .cmp-reset-btn { width:100%; padding:11px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:9px; font-size:12px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; }
+    .cmp-reset-btn:hover { border-color:var(--bear); color:var(--bear); }
+    /* META E LIMITE DO DIA */
+    .cmp-real-tag { color:var(--bull); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
+    .cmp-meta-inputs-row { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+    .cmp-meta-field label { margin-bottom:5px; }
+    .cmp-meta-inp { font-size:15px; padding:11px 8px; text-align:center; background:#1c1c34; border-color:#31314f; color:#eceefa; }
+    .cmp-meta-inp::placeholder { color:#7a7aa0; }
+    .cmp-calc-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px; }
+    .cmp-calc-box { border-radius:10px; padding:12px; text-align:center; border:1px solid var(--border); }
+    .cmp-calc-box.bear { background:var(--bear-dim); border-color:var(--bear); }
+    .cmp-calc-box.bull { background:var(--bull-dim); border-color:var(--bull); }
+    .cmp-calc-box span { display:block; font-size:9px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:4px; }
+    .cmp-calc-box.bear strong { color:var(--bear); font-family:var(--mono); font-size:15px; }
+    .cmp-calc-box.bull strong { color:var(--bull); font-family:var(--mono); font-size:15px; }
+    .cmp-entries-grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin-bottom:14px; }
+    .cmp-entry-field { display:flex; flex-direction:column; gap:4px; }
+    .cmp-entry-lbl { font-size:9px; text-transform:uppercase; letter-spacing:.4px; color:#9a9ac2; font-weight:700; text-align:center; }
+    .cmp-entry-inp { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 4px; color:var(--text); font-family:var(--mono); font-size:12px; font-weight:700; outline:none; text-align:center; }
+    .cmp-entry-inp:focus { border-color:var(--blue); }
+    .cmp-entry-inp.pos { border-color:var(--bull); color:var(--bull); }
+    .cmp-entry-inp.neg { border-color:var(--bear); color:var(--bear); }
+    .cmp-entry-inp.cmp-entry-gain { border-color:var(--bull); color:var(--bull); }
+    .cmp-entry-inp.cmp-entry-loss { border-color:var(--bear); color:var(--bear); }
+    .cmp-export-btn { width:100%; padding:12px; background:var(--blue); color:#fff; border:none; border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; }
+    .cmp-export-btn:hover { opacity:.9; }
+    .cmp-total-row { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); border-radius:9px; padding:11px 14px; margin-bottom:10px; }
+    .cmp-total-row span { font-size:12px; color:var(--muted); font-weight:700; }
+    .cmp-total-row strong { font-family:var(--mono); font-size:16px; }
+    .cmp-total-row strong.pos { color:var(--bull); } .cmp-total-row strong.neg { color:var(--bear); }
+    .cmp-meta-bar-wrap { margin-bottom:14px; }
+    .cmp-meta-bar { height:10px; border-radius:5px; background:var(--surface2); overflow:hidden; margin-bottom:6px; border:1px solid var(--border); }
+    .cmp-meta-bar-fill { height:100%; width:0%; border-radius:5px; transition:width .4s ease, background .3s; background:var(--muted); }
+    .cmp-meta-bar-label { font-size:11px; text-align:center; color:var(--muted); font-weight:600; }
+    /* METAS DO MES */
+    .cmp-metames-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+    .cmp-metames-desc { flex:1; background:#1c1c34; border:1px solid #31314f; border-radius:8px; padding:10px 12px; color:#eceefa; font-size:13px; font-family:var(--ui); outline:none; }
+    .cmp-metames-desc:focus { border-color:var(--blue); }
+    .cmp-metames-desc::placeholder { color:var(--muted); }
+    .cmp-metames-valor { width:110px; flex-shrink:0; background:#1c1c34; border:1px solid #31314f; border-radius:8px; padding:10px 8px; color:var(--bull); font-family:var(--mono); font-size:13px; font-weight:700; outline:none; text-align:right; }
+    .cmp-metames-valor:focus { border-color:var(--blue); }
+    .cmp-metames-del { width:34px; height:34px; flex-shrink:0; border-radius:8px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .cmp-add-meta-btn { width:100%; padding:11px; background:var(--blue-dim); border:1px dashed var(--blue); color:var(--blue); border-radius:9px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; }
+    .cmp-add-meta-btn:hover { opacity:.85; }
+
+    /* OPERACIONAL */
+    .op-method-layout { display:flex; flex-direction:column; gap:16px; }
+    .op-method-img-col { flex:1; }
+    .op-method-notes-col { flex:1; display:flex; flex-direction:column; }
+    .op-method-notes-col .f-area { flex:1; min-height:220px; }
+    .op-method-img-zone { width:100%; min-height:240px; border:2px dashed var(--border); border-radius:12px; background:#1c1c34; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer; position:relative; overflow:hidden; padding:20px; text-align:center; transition:border-color .2s; }
+    .op-method-img-zone:hover { border-color:var(--blue); }
+    .op-method-img-zone img { width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000; }
+    .op-method-placeholder-ico { font-size:34px; opacity:.4; }
+    .op-method-placeholder-txt { font-size:12px; color:#9a9ac2; max-width:240px; line-height:1.5; }
+    .op-method-img-del { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:var(--bear); border:none; color:#fff; font-size:15px; font-weight:900; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+    .op-method-img-badge { position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,.75); color:#fff; font-size:10px; padding:3px 9px; border-radius:6px; z-index:2; pointer-events:none; }
+    .opm-entry-card { margin-bottom:14px; }
+    .opm-entry-top { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+    .opm-title-inp { flex:1; background:#1c1c34; border:1px solid #31314f; border-radius:9px; padding:12px 14px; color:var(--bull); font-weight:800; text-transform:uppercase; letter-spacing:.4px; font-size:14px; outline:none; font-family:var(--ui); }
+    .opm-title-inp:focus { border-color:var(--bull); }
+    .opm-title-inp::placeholder { color:#3f7a55; text-transform:uppercase; }
+    .opm-entry-del { width:38px; height:38px; flex-shrink:0; border-radius:9px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .opm-entry-del:hover { opacity:.85; }
+
     /* DESKTOP */
     @media (min-width: 900px) {
       .hdr { padding:12px 24px; } .hdr-nav { display:flex; }
@@ -206,6 +318,10 @@
       .form-wrap { overflow-y:auto; height:100%; border-right:1px solid var(--border); border-bottom:none; padding:20px; }
       .list-wrap { overflow-y:auto; height:100%; padding:20px; }
       #tab-stats { overflow-y:auto; height:100%; }
+      #tab-compromisso { overflow-y:auto; height:100%; }
+      #tab-operacional { overflow-y:auto; height:100%; }
+      .op-method-layout { flex-direction:row; align-items:stretch; }
+      .op-method-img-zone { min-height:100%; }
       .stats-wrap { max-width:1100px; margin:0 auto; padding:20px; }
       .stats-grid { grid-template-columns:repeat(4,1fr); } .scard.full { grid-column:auto; }
       .modal { overflow:hidden; background:rgba(0,0,0,.78); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px; }
@@ -230,7 +346,7 @@
         <ol><li>Acesse <strong>supabase.com</strong></li><li>Vá em <strong>Settings &#8594; API</strong></li><li>Copie a <strong>Project URL</strong> e a chave <strong>anon public</strong></li></ol>
       </details>
       <details class="cfg-details">
-        <summary>SQL para criar a tabela</summary>
+        <summary>SQL para criar as tabelas</summary>
         <pre class="cfg-sql" id="cfg-sql-block">create table operacoes (
   id bigserial primary key,
   par text not null,
@@ -244,10 +360,64 @@
   thumb text,
   imagem text,
   imagens text,
+  origem text default 'print',
   ts timestamptz default now()
 );
 alter table operacoes enable row level security;
 create policy "acesso_publico" on operacoes
+  for all using (true) with check (true);
+
+create table compromisso_dias (
+  dia int primary key,
+  status text,
+  updated_at timestamptz default now()
+);
+alter table compromisso_dias enable row level security;
+create policy "acesso_publico_dias" on compromisso_dias
+  for all using (true) with check (true);
+
+create table compromisso_config (
+  id int primary key default 1,
+  nome text default ''
+);
+insert into compromisso_config (id, nome) values (1, '') on conflict (id) do nothing;
+alter table compromisso_config enable row level security;
+create policy "acesso_publico_config" on compromisso_config
+  for all using (true) with check (true);
+
+create table meta_limite_dia (
+  id int primary key default 1,
+  banca numeric,
+  stop_pct numeric,
+  gain_pct numeric,
+  gains jsonb default '[]'::jsonb,
+  losses jsonb default '[]'::jsonb,
+  updated_at timestamptz default now()
+);
+insert into meta_limite_dia (id) values (1) on conflict (id) do nothing;
+alter table meta_limite_dia enable row level security;
+create policy "acesso_publico_meta" on meta_limite_dia
+  for all using (true) with check (true);
+
+create table metas_mes (
+  id bigserial primary key,
+  descricao text,
+  valor numeric,
+  criado_em timestamptz default now()
+);
+alter table metas_mes enable row level security;
+create policy "acesso_publico_metames" on metas_mes
+  for all using (true) with check (true);
+
+create table operacional_entries (
+  id bigserial primary key,
+  titulo text,
+  notas text,
+  imagens jsonb default '[]'::jsonb,
+  criado_em timestamptz default now()
+);
+alter table operacional_entries enable row level security;
+create policy "acesso_publico_operacional" on operacional_entries
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -264,6 +434,8 @@ create policy "acesso_publico" on operacoes
     <nav class="hdr-nav">
       <button class="hdr-tab active" data-tab="ops" onclick="switchTab('ops')">&#128203; Opera&#231;&#245;es</button>
       <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Estat&#237;sticas</button>
+      <button class="hdr-tab" data-tab="compromisso" onclick="switchTab('compromisso')">&#128591; Compromisso</button>
+      <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Operacional</button>
     </nav>
     <button class="hdr-settings" onclick="openConfig()">&#9881;</button>
   </header>
@@ -333,6 +505,55 @@ create policy "acesso_publico" on operacoes
           <label class="f-lbl" for="inp-nota">Anota&#231;&#245;es</label>
           <textarea class="f-area" id="inp-nota" rows="3" placeholder="O que voc&#234; observou nessa opera&#231;&#227;o?"></textarea>
         </div>
+
+        <div class="cmp-card" style="margin-top:4px">
+          <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
+          <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca do Dia</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="ops-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('ops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Stop Loss (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="ops-stop-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('ops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Meta Gain (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="ops-gain-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('ops')">
+            </div>
+          </div>
+          <div class="cmp-calc-row">
+            <div class="cmp-calc-box bear"><span>Limite de Perda</span><strong id="ops-stop-val">R$ 0,00</strong></div>
+            <div class="cmp-calc-box bull"><span>Meta de Ganho</span><strong id="ops-gain-val">R$ 0,00</strong></div>
+          </div>
+          <div class="cmp-sec-title" style="margin-top:20px">&#128200; Entradas de Gain</div>
+          <div class="cmp-entries-grid" id="ops-entries-grid"></div>
+          <div class="cmp-sec-title" style="margin-top:14px">&#128201; Entradas de Loss</div>
+          <div class="cmp-entries-grid" id="ops-loss-grid"></div>
+          <div class="cmp-total-row">
+            <span>Resultado acumulado</span>
+            <strong id="ops-total-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-meta-bar-wrap">
+            <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="ops-meta-bar-fill"></div></div>
+            <div class="cmp-meta-bar-label" id="ops-meta-bar-label">Registre suas entradas para acompanhar</div>
+          </div>
+          <button class="cmp-export-btn" onclick="exportCmpTradeDia()">&#128228; Exportar Trade do Dia</button>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta()">&#8635; Reiniciar dia</button>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128176; Metas do M&#234;s</div>
+          <p class="cmp-hint" style="margin-bottom:14px">Ex: Pagar conta da TV / canais &#8212; R$ 120,00</p>
+          <div id="ops-metames-list"></div>
+          <button class="cmp-add-meta-btn" onclick="addCmpMetaMes()">&#43; Adicionar meta</button>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total das metas</span>
+            <strong id="ops-metames-total">R$ 0,00</strong>
+          </div>
+        </div>
+
         <button class="btn-save" onclick="saveOp()">SALVAR OPERA&#199;&#195;O</button>
       </div>
       <div class="list-wrap">
@@ -342,6 +563,11 @@ create policy "acesso_publico" on operacoes
           <button class="filter-btn" data-filter="acoes" onclick="setFilter('acoes',this)">&#128200; A&#231;&#245;es</button>
           <button class="filter-btn" data-filter="fiis" onclick="setFilter('fiis',this)">&#127963; FIIs</button>
         </div>
+        <div class="filter-wrap">
+          <button class="filter-btn active" data-filterconta="all" onclick="setFilterConta('all',this)">Todas as Contas</button>
+          <button class="filter-btn" data-filterconta="real" onclick="setFilterConta('real',this)">&#128994; Real</button>
+          <button class="filter-btn" data-filterconta="simulacao" onclick="setFilterConta('simulacao',this)">&#128309; Simula&#231;&#227;o</button>
+        </div>
         <div class="list-head" id="list-head">Hist&#243;rico</div>
         <div id="op-list"></div>
       </div>
@@ -350,12 +576,8 @@ create policy "acesso_publico" on operacoes
     <!-- ESTATISTICAS -->
     <div class="tab" id="tab-stats">
       <div class="stats-wrap">
-        <div class="stats-conta-filter">
-          <button class="sconta-btn active" onclick="setStatsConta('all',this)">Todas</button>
-          <button class="sconta-btn" onclick="setStatsConta('real',this)">&#128994; Real</button>
-          <button class="sconta-btn" onclick="setStatsConta('simulacao',this)">&#128309; Simula&#231;&#227;o</button>
-        </div>
-        <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Registre opera&#231;&#245;es para ver as estat&#237;sticas.</p></div>
+        <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
+        <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
         <div id="s-content">
           <div class="stats-grid">
             <div class="scard full"><div class="sval blue" id="s-total">0</div><div class="slbl">Total de Opera&#231;&#245;es</div></div>
@@ -386,11 +608,221 @@ create policy "acesso_publico" on operacoes
         </div>
       </div>
     </div>
+
+    <!-- COMPROMISSO COM DEUS -->
+    <div class="tab" id="tab-compromisso">
+      <div class="cmp-wrap">
+
+        <div class="cmp-card cmp-hero">
+          <div class="cmp-hero-ico">&#9878;&#65039;</div>
+          <h2 class="cmp-title">CONTRATO DE FIDELIDADE COM DEUS</h2>
+          <p class="cmp-sub">Meu compromisso de f&#233;, disciplina e dom&#237;nio pr&#243;prio no Day Trade</p>
+          <div class="cmp-meta-row">
+            <div class="cmp-meta"><span class="cmp-meta-lbl">Data de in&#237;cio</span><span class="cmp-meta-val">04/09/2026</span></div>
+            <div class="cmp-meta"><span class="cmp-meta-lbl">Per&#237;odo</span><span class="cmp-meta-val">31 dias</span></div>
+          </div>
+          <p class="cmp-proposito"><strong>Prop&#243;sito:</strong> Honrar a Deus atrav&#233;s das minhas decis&#245;es, inclusive financeiras.</p>
+          <div class="cmp-verse">&#8220;Reconhe&#231;a-o em todos os seus caminhos, e ele endireitar&#225; as suas veredas.&#8221;<span class="cmp-verse-ref">Prov&#233;rbios 3:6 &#8212; NVI</span></div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128591; Meu Compromisso com Deus</div>
+          <p class="cmp-p">Eu reconhe&#231;o que o dinheiro n&#227;o &#233; o meu senhor, e que minha vida n&#227;o pode ser governada pela gan&#226;ncia, ansiedade ou desejo de enriquecimento r&#225;pido.</p>
+          <p class="cmp-p">Meu prop&#243;sito n&#227;o &#233; fazer do Day Trade a raz&#227;o da minha vida. Quero que ele seja apenas uma atividade financeira realizada com responsabilidade, e jamais algo que me afaste de Deus, da minha fam&#237;lia, da minha sa&#250;de, do meu descanso ou dos meus princ&#237;pios.</p>
+          <p class="cmp-p" style="color:var(--bull);font-weight:700">Para que seja uma b&#234;n&#231;&#227;o eu tenho que seguir os mandamentos b&#237;blicos.</p>
+          <p class="cmp-p" style="margin-top:14px"><strong>Eu me comprometo, diante de Deus, a:</strong></p>
+          <ul class="cmp-list">
+            <li>Colocar Deus em primeiro lugar, honrando com meu compromisso.</li>
+            <li>Ter dom&#237;nio pr&#243;prio.</li>
+            <li>N&#227;o operar movida pela gan&#226;ncia.</li>
+            <li>N&#227;o tentar recuperar uma perda imediatamente.</li>
+            <li>Respeitar meu limite de perda.</li>
+            <li>Respeitar minha meta de ganho.</li>
+            <li>Encerrar o dia quando minha mente estiver cansada.</li>
+            <li>N&#227;o transformar uma opera&#231;&#227;o em uma obsess&#227;o.</li>
+            <li>Cuidar dos meus olhos, corpo, alimenta&#231;&#227;o, &#225;gua e sono.</li>
+            <li>Dar aten&#231;&#227;o &#224; minha fam&#237;lia.</li>
+            <li>Aceitar que n&#227;o operar tamb&#233;m &#233; uma decis&#227;o.</li>
+            <li>Nunca colocar em risco um dinheiro que n&#227;o posso perder.</li>
+          </ul>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128221; A Li&#231;&#227;o do Dia &#8212; 04/09/2026</div>
+          <p class="cmp-quote">&#8220;Ganhei R$ 32. A gan&#226;ncia de querer mais fez eu perder.&#8221;</p>
+          <p class="cmp-p">Eu vinha tendo consist&#234;ncia. Cheguei a aproximadamente 51% de crescimento sobre minha banca, mas em determinado momento permiti que a vontade de ganhar mais tomasse o controle.</p>
+          <p class="cmp-p">O resultado foi uma sequ&#234;ncia de decis&#245;es que me fizeram devolver o lucro e ainda precisar realizar novo aporte. Minha banca, que come&#231;ou com aproximadamente R$ 163, chegou a crescer significativamente, mas a falta de controle fez com que eu colocasse em risco aquilo que havia conquistado.</p>
+          <p class="cmp-p"><strong>A verdadeira perda n&#227;o foi apenas financeira.</strong> Naquele dia:</p>
+          <ul class="cmp-list cmp-list-red">
+            <li>Passei o dia inteiro dedicada ao trade.</li>
+            <li>Fiquei ansiosa.</li>
+            <li>Mantive os olhos fixos no gr&#225;fico por muito tempo.</li>
+            <li>Fiquei preocupada com minha vis&#227;o.</li>
+            <li>Minha m&#227;e chegou a me alertar sobre meus olhos.</li>
+            <li>Senti ansiedade a ponto de passar mal.</li>
+            <li>Tive confus&#227;o mental depois de muitas horas analisando gr&#225;ficos.</li>
+            <li>&#192; tarde estava cansada e os gr&#225;ficos j&#225; n&#227;o estavam bons para mim.</li>
+            <li>N&#227;o cuidei adequadamente da minha hidrata&#231;&#227;o.</li>
+            <li>N&#227;o dei aten&#231;&#227;o adequada &#224;s coisas que deveria fazer no dia.</li>
+            <li>Meu pai ligou e eu n&#227;o atendi; depois ele foi at&#233; mim.</li>
+            <li>&#192; noite perdi o sono e fui dormir aproximadamente &#224;s 2h40.</li>
+          </ul>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128214; O Que a B&#237;blia Ensina Sobre Gan&#226;ncia</div>
+          <p class="cmp-p"><strong>&#128176; A gan&#226;ncia n&#227;o pode me dominar</strong></p>
+          <div class="cmp-verse cmp-verse-sm">&#8220;Pois o amor ao dinheiro &#233; a raiz de todos os males.&#8221;<span class="cmp-verse-ref">1 Tim&#243;teo 6:10 &#8212; NVI</span></div>
+          <p class="cmp-p">O problema n&#227;o &#233; simplesmente possuir dinheiro. O perigo est&#225; em amar o dinheiro, colocar nele minha seguran&#231;a ou permitir que o desejo de ganhar me domine.</p>
+          <p class="cmp-p" style="margin-top:12px"><strong>&#128683; Quando j&#225; ganhei, n&#227;o preciso continuar</strong></p>
+          <div class="cmp-verse cmp-verse-sm">&#8220;Quem ama o dinheiro jamais ter&#225; o suficiente; quem ama as riquezas jamais ficar&#225; satisfeito com os seus rendimentos.&#8221;<span class="cmp-verse-ref">Eclesiastes 5:10 &#8212; NVI</span></div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128170; Dom&#237;nio Pr&#243;prio</div>
+          <div class="cmp-verse cmp-verse-sm">&#8220;Pois Deus n&#227;o nos deu esp&#237;rito de covardia, mas de poder, de amor e de equil&#237;brio.&#8221;<span class="cmp-verse-ref">2 Tim&#243;teo 1:7 &#8212; NVI</span></div>
+          <p class="cmp-p">Dom&#237;nio pr&#243;prio significa saber parar. Parar quando:</p>
+          <ul class="cmp-list">
+            <li>j&#225; atingi minha meta;</li>
+            <li>atingi meu limite de perda;</li>
+            <li>estou cansada;</li>
+            <li>estou ansiosa;</li>
+            <li>estou tentando recuperar dinheiro;</li>
+            <li>estou com raiva;</li>
+            <li>estou querendo &#8220;s&#243; mais uma opera&#231;&#227;o&#8221;;</li>
+            <li>minha concentra&#231;&#227;o n&#227;o est&#225; boa.</li>
+          </ul>
+          <p class="cmp-rule">EU N&#195;O PRECISO OPERAR.</p>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#129497;&#8205;&#9792;&#65039; Disciplina</div>
+          <div class="cmp-verse cmp-verse-sm">&#8220;Todos os que competem nos jogos se submetem a um treinamento rigoroso para obter uma coroa que logo perece, mas n&#243;s o fazemos para ganhar uma coroa imperec&#237;vel.&#8221;<span class="cmp-verse-ref">1 Cor&#237;ntios 9:25 &#8212; NVI</span></div>
+          <p class="cmp-p">O trader disciplinado n&#227;o &#233; aquele que opera muito. &#201; aquele que consegue obedecer &#224;s pr&#243;prias regras mesmo quando sente vontade de quebr&#225;-las.</p>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#10084;&#65039; Minha Sa&#250;de Vale Mais Que Uma Opera&#231;&#227;o</div>
+          <div class="cmp-verse cmp-verse-sm">&#8220;Acaso n&#227;o sabem que o corpo de voc&#234;s &#233; santu&#225;rio do Esp&#237;rito Santo que habita em voc&#234;s, que lhes foi dado por Deus, e que voc&#234;s n&#227;o s&#227;o de si mesmos?&#8221;<span class="cmp-verse-ref">1 Cor&#237;ntios 6:19 &#8212; NVI</span></div>
+          <p class="cmp-p">Meu corpo n&#227;o ser&#225; sacrificado em busca de dinheiro.</p>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#9989; Meu C&#243;digo de Conduta</div>
+          <ul class="cmp-list cmp-list-q">
+            <li>Orei? &#128591;</li>
+            <li>Tenho um limite de perda definido? &#128683;</li>
+            <li>Tenho uma meta definida? &#127919;</li>
+            <li>Estou disposta a aceitar uma perda sem tentar recuperar?</li>
+          </ul>
+        </div>
+
+        <div class="cmp-card cmp-card-highlight">
+          <div class="cmp-sec-title">&#128142; Meu Vers&#237;culo Principal</div>
+          <div class="cmp-verse cmp-verse-lg">&#8220;Acima de tudo, guarde o seu cora&#231;&#227;o, pois dele depende toda a sua vida.&#8221;<span class="cmp-verse-ref">Prov&#233;rbios 4:23 &#8212; NVI</span></div>
+          <p class="cmp-p" style="margin-top:12px">Eu n&#227;o quero apenas controlar minha banca. Quero controlar meu cora&#231;&#227;o. Porque foi o cora&#231;&#227;o que disse: &#8220;J&#225; ganhei bastante, mas quero mais.&#8221; E foi justamente nesse momento que perdi o controle.</p>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#9997;&#65039; Assinatura do Compromisso</div>
+          <p class="cmp-p">Meu objetivo n&#227;o &#233; simplesmente ganhar dinheiro. Meu objetivo &#233; me tornar uma pessoa disciplinada, equilibrada e respons&#225;vel, colocando Deus acima do dinheiro, colocando Deus acima de tudo e tendo dom&#237;nio pr&#243;prio.</p>
+          <label class="f-lbl" style="margin-top:14px;display:block">Eu,</label>
+          <input type="text" class="f-inp" id="cmp-nome" placeholder="seu nome completo" style="text-transform:none;font-family:var(--ui);font-weight:600" oninput="saveCmpNome()">
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
+          <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca do Dia</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="cmp-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('cmp')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Stop Loss (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="cmp-stop-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('cmp')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Meta Gain (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="cmp-gain-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('cmp')">
+            </div>
+          </div>
+          <div class="cmp-calc-row">
+            <div class="cmp-calc-box bear"><span>Limite de Perda</span><strong id="cmp-stop-val">R$ 0,00</strong></div>
+            <div class="cmp-calc-box bull"><span>Meta de Ganho</span><strong id="cmp-gain-val">R$ 0,00</strong></div>
+          </div>
+
+          <div class="cmp-sec-title" style="margin-top:20px">&#128200; Entradas de Gain</div>
+          <div class="cmp-entries-grid" id="cmp-entries-grid"></div>
+
+          <div class="cmp-sec-title" style="margin-top:14px">&#128201; Entradas de Loss</div>
+          <div class="cmp-entries-grid" id="cmp-loss-grid"></div>
+
+          <div class="cmp-total-row">
+            <span>Resultado acumulado</span>
+            <strong id="cmp-total-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-meta-bar-wrap">
+            <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="cmp-meta-bar-fill"></div></div>
+            <div class="cmp-meta-bar-label" id="cmp-meta-bar-label">Registre suas entradas para acompanhar</div>
+          </div>
+          <button class="cmp-export-btn" onclick="exportCmpTradeDia()">&#128228; Exportar Trade do Dia</button>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta()">&#8635; Reiniciar dia</button>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128176; Metas do M&#234;s</div>
+          <p class="cmp-hint" style="margin-bottom:14px">Ex: Pagar conta da TV / canais &#8212; R$ 120,00</p>
+          <div id="cmp-metames-list"></div>
+          <button class="cmp-add-meta-btn" onclick="addCmpMetaMes()">&#43; Adicionar meta</button>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total das metas</span>
+            <strong id="cmp-metames-total">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Desafio dos 31 Dias</div>
+          <div class="cmp-progress-wrap">
+            <div class="cmp-progress-ring-box">
+              <svg viewBox="0 0 100 100" class="cmp-ring-svg">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="9"/>
+                <circle id="cmp-ring-fg" cx="50" cy="50" r="42" fill="none" stroke="var(--bull)" stroke-width="9" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              </svg>
+              <div class="cmp-ring-label"><span id="cmp-ring-pct">0%</span><small>cumprido</small></div>
+            </div>
+            <div class="cmp-progress-stats">
+              <div class="cmp-pstat"><span class="cmp-pstat-val" id="cmp-stat-ok" style="color:var(--bull)">0</span><span class="cmp-pstat-lbl">Cumpridos</span></div>
+              <div class="cmp-pstat"><span class="cmp-pstat-val" id="cmp-stat-fail" style="color:var(--bear)">0</span><span class="cmp-pstat-lbl">Descumpridos</span></div>
+              <div class="cmp-pstat"><span class="cmp-pstat-val" id="cmp-stat-pend" style="color:var(--muted)">31</span><span class="cmp-pstat-lbl">Pendentes</span></div>
+            </div>
+          </div>
+          <p class="cmp-hint">Toque em cada dia: cinza &#8594; verde (cumpri) &#8594; vermelho (descumpri) &#8594; cinza</p>
+          <div class="cmp-days-grid" id="cmp-days-grid"></div>
+          <button class="cmp-reset-btn" onclick="resetCmpDias()">&#8635; Reiniciar desafio</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- OPERACIONAL -->
+    <div class="tab" id="tab-operacional">
+      <div class="cmp-wrap">
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#129517; Meu M&#233;todo Operacional</div>
+          <p class="cmp-hint" style="margin-bottom:0;text-align:left">Adicione quantos prints e anota&#231;&#245;es quiser. Toque na imagem para enviar, ou foque nela (toque) e cole (Ctrl+V) uma imagem copiada.</p>
+        </div>
+        <div id="opm-entries-list"></div>
+        <button class="cmp-add-meta-btn" onclick="addOpmEntry()">&#43; Adicionar Print com Anota&#231;&#227;o</button>
+      </div>
+    </div>
   </div>
 
   <nav class="bnav">
     <button class="bnav-btn active" data-tab="ops" onclick="switchTab('ops')"><span class="ico">&#128203;</span>Opera&#231;&#245;es</button>
     <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Estat&#237;sticas</button>
+    <button class="bnav-btn" data-tab="compromisso" onclick="switchTab('compromisso')"><span class="ico">&#128591;</span>Compromisso</button>
+    <button class="bnav-btn" data-tab="operacional" onclick="switchTab('operacional')"><span class="ico">&#129517;</span>Operacional</button>
   </nav>
 
   <!-- Modal -->
@@ -436,6 +868,19 @@ create policy "acesso_publico" on operacoes
     </div>
   </div>
 
+  <!-- Confirmacao Generica -->
+  <div class="del-overlay" id="gen-confirm-overlay">
+    <div class="del-box">
+      <div class="del-box-ico">&#9888;&#65039;</div>
+      <div class="del-box-title" id="gen-confirm-title">Confirmar?</div>
+      <div class="del-box-sub" id="gen-confirm-sub"></div>
+      <div class="del-box-btns">
+        <button class="del-btn-no" onclick="hideGenConfirm()">CANCELAR</button>
+        <button class="del-btn-yes" id="gen-confirm-yes-btn">CONFIRMAR</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* CONFIG */
     var SUPA_URL = localStorage.getItem('jpf_url') || '';
@@ -447,7 +892,9 @@ create policy "acesso_publico" on operacoes
       SUPA_URL = url; SUPA_KEY = key;
       localStorage.setItem('jpf_url', url); localStorage.setItem('jpf_key', key);
       document.getElementById('cfg-overlay').classList.remove('show');
-      showToast('Conectado!', 'success'); renderList();
+      showToast('Conectado!', 'success');
+      renderList();
+      refreshMetaPanel();
     }
     function openConfig() {
       document.getElementById('cfg-url').value = SUPA_URL;
@@ -465,7 +912,7 @@ create policy "acesso_publico" on operacoes
         headers: Object.assign({ 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, opts.headers || {})
       })).then(function(r) { return r.text().then(function(txt) { if (!r.ok) throw new Error('Supabase ' + r.status + ': ' + txt); return txt ? JSON.parse(txt) : null; }); });
     }
-    function dbList() { return supaReq('operacoes?select=id,par,dir,res,categoria,conta,valor,moeda,nota,thumb,ts&order=ts.desc'); }
+    function dbList() { return supaReq('operacoes?select=id,par,dir,res,categoria,conta,valor,moeda,nota,thumb,origem,ts&order=ts.desc'); }
     function dbOne(id) { return supaReq('operacoes?id=eq.' + id + '&select=*'); }
     function dbAdd(data) { return supaReq('operacoes', { method: 'POST', body: JSON.stringify(data) }); }
     function dbUpd(id, d) { return supaReq('operacoes?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(d), headers: { 'Prefer': 'return=minimal' } }); }
@@ -501,13 +948,13 @@ create policy "acesso_publico" on operacoes
     /* STATE */
     var selImgs = [], selDir = null, selRes = null, selCur = null, selCat = null, selConta = null;
     var modalId = null, editMode = false, editImgs = null;
-    var filterCat = 'all', statsConta = 'all';
+    var filterCat = 'all', filterConta = 'all';
     var carouselImgs = [], carouselIdx = 0;
     var loadCount = 0;
 
     /* LOADING / TOAST */
     function setLoading(on) { loadCount += on ? 1 : -1; if (loadCount < 0) loadCount = 0; document.getElementById('loading-bar').style.display = loadCount > 0 ? 'block' : 'none'; }
-    function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show ' + (type||''); clearTimeout(t._t); t._t = setTimeout(function() { t.classList.remove('show'); }, 3000); }
+    function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show ' + (type||''); clearTimeout(t._t); t._t = setTimeout(function() { t.classList.remove('show'); }, type === 'error' ? 6000 : 3000); }
 
     /* MULTI-IMAGE FORM */
     function renderFormImages() {
@@ -628,8 +1075,8 @@ create policy "acesso_publico" on operacoes
       document.getElementById('tog-real').classList.toggle('on-real', val==='real');
       document.getElementById('tog-sim').classList.toggle('on-sim', val==='simulacao');
     }
-    function setFilter(val, btn) { filterCat = val; document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); renderList(); }
-    function setStatsConta(val, btn) { statsConta = val; document.querySelectorAll('.sconta-btn').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); updateStats(); }
+    function setFilter(val, btn) { filterCat = val; document.querySelectorAll('[data-filter]').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); renderList(); }
+    function setFilterConta(val, btn) { filterConta = val; document.querySelectorAll('[data-filterconta]').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); renderList(); }
     function fmtValor(valor, moeda) {
       var num = parseFloat(valor); if (isNaN(num) || num === 0) return '';
       if (moeda === 'usd') return 'US$ ' + num.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -653,7 +1100,7 @@ create policy "acesso_publico" on operacoes
           par: par, dir: selDir, res: selRes, categoria: selCat, conta: selConta,
           valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota,
           thumb: thumb, imagem: imgs[0] || null, imagens: imgs.length > 0 ? JSON.stringify(imgs) : null,
-          ts: new Date().toISOString()
+          origem: 'print', ts: new Date().toISOString()
         });
       }).then(function() {
         resetForm(); showToast('Operação salva!', 'success'); return renderList();
@@ -677,9 +1124,14 @@ create policy "acesso_publico" on operacoes
       setLoading(true);
       return dbList().then(function(ops) {
         setLoading(false);
-        var filtered = filterCat === 'all' ? ops : ops.filter(function(o) { return o.categoria === filterCat; });
+        var filtered = ops.filter(function(o) {
+          if (o.origem === 'exportado') return false;
+          var okCat = filterCat === 'all' || o.categoria === filterCat;
+          var okConta = filterConta === 'all' || o.conta === filterConta;
+          return okCat && okConta;
+        });
         head.textContent = 'Histórico — ' + filtered.length + ' operaç' + (filtered.length === 1 ? 'ão' : 'ões');
-        if (!filtered.length) { list.innerHTML = '<div class="empty"><div class="empty-ico">&#128202;</div><p>Nenhuma operação nesta categoria ainda.</p></div>'; return; }
+        if (!filtered.length) { list.innerHTML = '<div class="empty"><div class="empty-ico">&#128202;</div><p>Nenhuma operação encontrada com esses filtros.</p></div>'; return; }
         var catLbl = { daytrade:'&#128178; Day Trade', acoes:'&#128200; Ações', fiis:'&#127963; FIIs' };
         var catCls = { daytrade:'cat-dt', acoes:'cat-ac', fiis:'cat-fii' };
         var cntLbl = { real:'&#128994; Real', simulacao:'&#128309; Sim' };
@@ -744,6 +1196,22 @@ create policy "acesso_publico" on operacoes
     }
     function showDelConfirm() { document.getElementById('del-overlay').classList.add('show'); }
     function hidDelConfirm() { document.getElementById('del-overlay').classList.remove('show'); }
+    var genConfirmCallback = null;
+    function showGenConfirm(title, sub, callback) {
+      document.getElementById('gen-confirm-title').textContent = title;
+      document.getElementById('gen-confirm-sub').textContent = sub;
+      genConfirmCallback = callback;
+      document.getElementById('gen-confirm-overlay').classList.add('show');
+    }
+    function hideGenConfirm() {
+      document.getElementById('gen-confirm-overlay').classList.remove('show');
+      genConfirmCallback = null;
+    }
+    document.getElementById('gen-confirm-yes-btn').addEventListener('click', function() {
+      var cb = genConfirmCallback;
+      hideGenConfirm();
+      if (cb) cb();
+    });
     function doDelete() {
       if (!modalId) return; hidDelConfirm(); setLoading(true);
       dbDel2(modalId).then(function() { closeModal(); showToast('Operação excluída.', 'success'); renderList(); updateStats(); })
@@ -788,7 +1256,8 @@ create policy "acesso_publico" on operacoes
       setLoading(true);
       dbList().then(function(ops) {
         setLoading(false);
-        var filtered = statsConta === 'all' ? ops : ops.filter(function(o) { return o.conta === statsConta; });
+        var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
+        var filtered = exportados;
         if (!filtered.length) { empty.style.display = 'block'; cont.style.display = 'none'; return; }
         empty.style.display = 'none'; cont.style.display = 'block';
         var total = filtered.length, gains = filtered.filter(function(o) { return o.res === 'gain'; }).length;
@@ -860,6 +1329,582 @@ create policy "acesso_publico" on operacoes
       document.querySelectorAll('.bnav-btn,.hdr-tab').forEach(function(b) { b.classList.remove('active'); });
       document.querySelectorAll('[data-tab="'+tab+'"]').forEach(function(b) { b.classList.add('active'); });
       if (tab === 'stats') updateStats();
+      if (tab === 'compromisso') renderCompromisso();
+      if (tab === 'operacional') loadOperacional();
+      if (tab === 'ops') refreshMetaPanel();
+    }
+
+    /* SUPABASE HELPERS - SINCRONIZACAO NA NUVEM */
+    function debounce(fn, wait) {
+      var t;
+      return function() {
+        var ctx = this, args = arguments;
+        clearTimeout(t);
+        t = setTimeout(function() { fn.apply(ctx, args); }, wait);
+      };
+    }
+    function dbCmpDiasList() { return supaReq('compromisso_dias?select=dia,status'); }
+    function dbCmpDiaUpsert(dia, status) {
+      return supaReq('compromisso_dias?on_conflict=dia', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ dia: dia, status: status }]) });
+    }
+    function dbCmpDiaDelete(dia) { return supaReq('compromisso_dias?dia=eq.' + dia, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+    function dbCmpDiasResetAll() { return supaReq('compromisso_dias?dia=gt.0', { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbCmpConfigGet() { return supaReq('compromisso_config?id=eq.1&select=nome'); }
+    function dbCmpConfigSet(nome) { return supaReq('compromisso_config?id=eq.1', { method: 'PATCH', body: JSON.stringify({ nome: nome }), headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbMetaGet() { return supaReq('meta_limite_dia?id=eq.1&select=*'); }
+    function dbMetaSet(fields) { return supaReq('meta_limite_dia?id=eq.1', { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbMetamesList() { return supaReq('metas_mes?select=id,descricao,valor&order=criado_em.asc'); }
+    function dbMetamesAdd(desc, valor) { return supaReq('metas_mes', { method: 'POST', body: JSON.stringify({ descricao: desc, valor: valor }) }); }
+    function dbMetamesUpd(id, fields) { return supaReq('metas_mes?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
+    function dbMetamesDel(id) { return supaReq('metas_mes?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
+    function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
+    function dbOpmUpd(id, fields) { return supaReq('operacional_entries?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
+    function dbOpmDel(id) { return supaReq('operacional_entries?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
+    /* OPERACIONAL - METODO (nuvem: operacional_entries) */
+    var opmEntriesCache = [];
+    var opmImgIdx = {};
+    function loadOperacionalFromCloud() {
+      return dbOpmList().then(function(rows) { opmEntriesCache = rows || []; }).catch(function(e) { showToast('Erro ao carregar m\u00e9todo operacional: ' + e.message, 'error'); opmEntriesCache = []; });
+    }
+    function loadOperacional() {
+      setLoading(true);
+      loadOperacionalFromCloud().then(function() { renderOpmEntries(); }).finally(function() { setLoading(false); });
+    }
+    function opmImgZoneHtml(id, imgs) {
+      imgs = imgs || [];
+      if (!imgs.length) {
+        return '<span class="op-method-placeholder-ico">&#128248;</span>' +
+          '<span class="op-method-placeholder-txt">Toque para enviar um ou mais prints, ou foque aqui e cole (Ctrl+V) &#8212; sem limite de quantidade</span>';
+      }
+      var cur = opmImgIdx[id] || 0;
+      if (cur >= imgs.length) cur = imgs.length - 1;
+      if (cur < 0) cur = 0;
+      opmImgIdx[id] = cur;
+      var arrows = imgs.length > 1 ?
+        '<button class="carousel-arrow prev" onclick="event.stopPropagation();prevOpmImg(' + id + ')">&#8249;</button>' +
+        '<button class="carousel-arrow next" onclick="event.stopPropagation();nextOpmImg(' + id + ')">&#8250;</button>' : '';
+      var dots = imgs.length > 1 ? '<div class="carousel-dots">' + imgs.map(function(_, di) {
+        return '<button class="carousel-dot' + (di === cur ? ' active' : '') + '" onclick="event.stopPropagation();jumpOpmImg(' + id + ',' + di + ')"></button>';
+      }).join('') + '</div>' : '';
+      var counter = imgs.length > 1 ? '<div class="carousel-counter">' + (cur + 1) + '/' + imgs.length + '</div>' : '';
+      return '<div class="carousel-wrap" style="width:100%;height:100%;position:absolute;inset:0">' +
+        '<div class="carousel-img-container" style="height:100%"><img src="' + imgs[cur] + '" alt="m\u00e9todo operacional"></div>' +
+        arrows + dots + counter +
+        '<button class="op-method-img-del" onclick="event.stopPropagation();clearOpmImage(' + id + ')" title="Remover esta imagem">&#10005;</button>' +
+        '<span class="op-method-img-badge">Toque para adicionar mais</span>' +
+      '</div>';
+    }
+    function opmEntryHtml(e) {
+      var id = e.id;
+      return '<div class="cmp-card opm-entry-card">' +
+        '<div class="opm-entry-top">' +
+          '<input type="text" class="opm-title-inp" id="opm-titulo-' + id + '" placeholder="T\u00cdTULO" value="' + escHtml(e.titulo||'') + '" oninput="updOpmField(' + id + ',\'titulo\',this.value)">' +
+          '<button class="opm-entry-del" onclick="delOpmEntry(' + id + ')" title="Excluir">&#128465;&#65039;</button>' +
+        '</div>' +
+        '<div class="op-method-layout">' +
+          '<div class="op-method-img-col">' +
+            '<input type="file" id="opm-file-' + id + '" accept="image/*" multiple style="display:none" onchange="handleOpmFileChange(' + id + ', this)">' +
+            '<div class="op-method-img-zone" id="opm-imgzone-' + id + '" tabindex="0" data-idx="' + id + '" onclick="document.getElementById(\'opm-file-' + id + '\').click()">' + opmImgZoneHtml(id, e.imagens) + '</div>' +
+          '</div>' +
+          '<div class="op-method-notes-col">' +
+            '<label class="f-lbl">Anota&#231;&#245;es</label>' +
+            '<textarea class="f-area" id="opm-notas-' + id + '" placeholder="Escreva suas anota\u00e7\u00f5es..." oninput="updOpmField(' + id + ',\'notas\',this.value)">' + escHtml(e.notas||'') + '</textarea>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    function renderOpmEntries() {
+      var wrap = document.getElementById('opm-entries-list');
+      if (!wrap) return;
+      if (!opmEntriesCache.length) {
+        wrap.innerHTML = '<div class="empty"><div class="empty-ico">&#129517;</div><p>Nenhum print adicionado ainda. Toque em &#8220;Adicionar Print com Anota\u00e7\u00e3o&#8221; para come\u00e7ar.</p></div>';
+        return;
+      }
+      wrap.innerHTML = opmEntriesCache.map(function(e) { return opmEntryHtml(e); }).join('');
+    }
+    function refreshOpmZone(id) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      var zone = document.getElementById('opm-imgzone-' + id);
+      if (zone && item) zone.innerHTML = opmImgZoneHtml(id, item.imagens);
+    }
+    var opmFieldDebounceFns = {};
+    function updOpmField(id, field, val) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      if (!item) return;
+      item[field] = val;
+      var key = 'opm_' + id;
+      if (!opmFieldDebounceFns[key]) {
+        opmFieldDebounceFns[key] = debounce(function() {
+          var it = opmEntriesCache.find(function(e) { return e.id === id; });
+          if (!it) return;
+          dbOpmUpd(id, { titulo: it.titulo || '', notas: it.notas || '' }).catch(function(err) { showToast('Erro ao salvar: ' + err.message, 'error'); });
+        }, 600);
+      }
+      opmFieldDebounceFns[key]();
+    }
+    function addOpmEntry() {
+      setLoading(true);
+      dbOpmAdd().then(function(rows) {
+        var row = rows && rows[0];
+        if (row) opmEntriesCache.push(row);
+        renderOpmEntries();
+      }).catch(function(e) { showToast('Erro ao adicionar: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function delOpmEntry(id) {
+      showGenConfirm('Excluir este print e anota\u00e7\u00e3o?', 'Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbOpmDel(id).then(function() {
+          opmEntriesCache = opmEntriesCache.filter(function(e) { return e.id !== id; });
+          delete opmImgIdx[id];
+          renderOpmEntries();
+          showToast('Removido.', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+    function saveOpmImages(id) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      if (!item) return Promise.resolve();
+      return dbOpmUpd(id, { imagens: item.imagens || [] });
+    }
+    function clearOpmImage(id) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      if (!item || !item.imagens || !item.imagens.length) return;
+      var cur = opmImgIdx[id] || 0;
+      item.imagens.splice(cur, 1);
+      if (cur >= item.imagens.length) opmImgIdx[id] = Math.max(0, item.imagens.length - 1);
+      refreshOpmZone(id);
+      setLoading(true);
+      saveOpmImages(id).then(function() { showToast('Imagem removida.', 'success'); })
+        .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function prevOpmImg(id) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      if (!item || !item.imagens || !item.imagens.length) return;
+      var n = item.imagens.length;
+      opmImgIdx[id] = ((opmImgIdx[id] || 0) - 1 + n) % n;
+      refreshOpmZone(id);
+    }
+    function nextOpmImg(id) {
+      var item = opmEntriesCache.find(function(e) { return e.id === id; });
+      if (!item || !item.imagens || !item.imagens.length) return;
+      var n = item.imagens.length;
+      opmImgIdx[id] = ((opmImgIdx[id] || 0) + 1) % n;
+      refreshOpmZone(id);
+    }
+    function jumpOpmImg(id, di) { opmImgIdx[id] = di; refreshOpmZone(id); }
+    function handleOpmFileChange(id, inputEl) {
+      var files = Array.from(inputEl.files); if (!files.length) return;
+      setLoading(true);
+      Promise.all(files.map(function(f) {
+        return new Promise(function(res) {
+          var reader = new FileReader();
+          reader.onload = function(ev) { compressImage(ev.target.result).then(res); };
+          reader.readAsDataURL(f);
+        });
+      })).then(function(compressedArr) {
+        var item = opmEntriesCache.find(function(e) { return e.id === id; });
+        if (!item) return Promise.resolve();
+        if (!item.imagens) item.imagens = [];
+        item.imagens = item.imagens.concat(compressedArr);
+        opmImgIdx[id] = item.imagens.length - 1;
+        refreshOpmZone(id);
+        return saveOpmImages(id);
+      }).then(function() {
+        showToast('Print salvo!', 'success');
+      }).catch(function(e) { showToast('Erro ao enviar imagem: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+      inputEl.value = '';
+    }
+
+    document.addEventListener('paste', function(e) {
+      var tab = document.getElementById('tab-operacional');
+      if (!tab || !tab.classList.contains('active')) return;
+      var items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+      if (!items) return;
+      var hasImage = false;
+      for (var k = 0; k < items.length; k++) { if (items[k].type && items[k].type.indexOf('image') !== -1) { hasImage = true; break; } }
+      if (!hasImage) return;
+
+      var doPaste = function(id) {
+        for (var i2 = 0; i2 < items.length; i2++) {
+          if (items[i2].type && items[i2].type.indexOf('image') !== -1) {
+            var blob = items[i2].getAsFile();
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+              compressImage(ev.target.result).then(function(compressed) {
+                var item = opmEntriesCache.find(function(e) { return e.id === id; });
+                if (!item) return;
+                if (!item.imagens) item.imagens = [];
+                item.imagens.push(compressed);
+                opmImgIdx[id] = item.imagens.length - 1;
+                refreshOpmZone(id);
+                setLoading(true);
+                saveOpmImages(id).then(function() { showToast('Print colado com sucesso!', 'success'); })
+                  .catch(function(err) { showToast('Erro: ' + err.message, 'error'); })
+                  .finally(function() { setLoading(false); });
+              });
+            };
+            reader.readAsDataURL(blob);
+            e.preventDefault();
+            break;
+          }
+        }
+      };
+
+      var active = document.activeElement;
+      if (active && active.classList && active.classList.contains('op-method-img-zone') && active.dataset.idx !== undefined) {
+        doPaste(parseInt(active.dataset.idx, 10));
+      } else if (opmEntriesCache.length) {
+        doPaste(opmEntriesCache[opmEntriesCache.length - 1].id);
+      } else {
+        setLoading(true);
+        dbOpmAdd().then(function(rows) {
+          var row = rows && rows[0];
+          if (row) { opmEntriesCache.push(row); renderOpmEntries(); doPaste(row.id); }
+        }).catch(function(err) { showToast('Erro: ' + err.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      }
+    });
+
+    /* COMPROMISSO COM DEUS (nuvem: compromisso_dias, compromisso_config) */
+    var cmpDiasCache = {};
+    function loadCmpDias() {
+      return dbCmpDiasList().then(function(rows) {
+        cmpDiasCache = {};
+        (rows || []).forEach(function(r) { cmpDiasCache[r.dia] = r.status; });
+      }).catch(function(e) { showToast('Erro ao carregar desafio: ' + e.message, 'error'); });
+    }
+    var saveCmpNomeDebounced = debounce(function() {
+      var el = document.getElementById('cmp-nome');
+      if (!el) return;
+      dbCmpConfigSet(el.value).catch(function(e) { showToast('Erro ao salvar nome: ' + e.message, 'error'); });
+    }, 600);
+    function saveCmpNome() { saveCmpNomeDebounced(); }
+    function toggleCmpDia(dia) {
+      var cur = cmpDiasCache[dia] || 'none';
+      var next = cur === 'none' ? 'ok' : (cur === 'ok' ? 'fail' : 'none');
+      if (next === 'none') {
+        delete cmpDiasCache[dia];
+        dbCmpDiaDelete(dia).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+      } else {
+        cmpDiasCache[dia] = next;
+        dbCmpDiaUpsert(dia, next).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+      }
+      renderCmpDiasGrid();
+    }
+    function resetCmpDias() {
+      showGenConfirm('Reiniciar o desafio de 31 dias?', 'Isso vai apagar todas as marca\u00e7\u00f5es dos 31 dias. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbCmpDiasResetAll().then(function() {
+          cmpDiasCache = {};
+          renderCmpDiasGrid();
+          showToast('Desafio reiniciado!', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+    function renderCmpDiasGrid() {
+      var grid = document.getElementById('cmp-days-grid');
+      if (!grid) return;
+      var html = '';
+      var ok = 0, fail = 0;
+      for (var d = 1; d <= 31; d++) {
+        var st = cmpDiasCache[d] || 'none';
+        if (st === 'ok') ok++; if (st === 'fail') fail++;
+        var mark = st === 'ok' ? '&#9989;' : (st === 'fail' ? '&#10060;' : '');
+        html += '<div class="cmp-day ' + (st === 'ok' ? 'ok' : st === 'fail' ? 'fail' : '') + '" onclick="toggleCmpDia(' + d + ')">' +
+          '<span class="cmp-day-num">' + (d < 10 ? '0' + d : d) + '</span>' +
+          '<span class="cmp-day-mark">' + mark + '</span></div>';
+      }
+      grid.innerHTML = html;
+      var pend = 31 - ok - fail;
+      var pct = Math.round((ok / 31) * 100);
+      document.getElementById('cmp-stat-ok').textContent = ok;
+      document.getElementById('cmp-stat-fail').textContent = fail;
+      document.getElementById('cmp-stat-pend').textContent = pend;
+      document.getElementById('cmp-ring-pct').textContent = pct + '%';
+      var ring = document.getElementById('cmp-ring-fg');
+      var circumference = 264;
+      ring.style.strokeDashoffset = (circumference - (pct / 100) * circumference).toFixed(1);
+      ring.style.stroke = pct >= 80 ? 'var(--bull)' : pct >= 40 ? '#fbbf24' : 'var(--bear)';
+    }
+
+    /* META E LIMITE DO DIA (nuvem: meta_limite_dia) */
+    function fmtBRL(v) { return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function renderCmpEntriesGrid() {
+      ['cmp','ops'].forEach(function(px) {
+        var gGrid = document.getElementById(px + '-entries-grid');
+        if (gGrid && !gGrid.dataset.built) {
+          var gHtml = '';
+          for (var i = 1; i <= 5; i++) {
+            gHtml += '<div class="cmp-entry-field"><span class="cmp-entry-lbl">Gain ' + i + '</span>' +
+              '<input type="number" class="cmp-entry-inp cmp-entry-gain" id="' + px + '-entry-' + i + '" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta(\'' + px + '\')"></div>';
+          }
+          gGrid.innerHTML = gHtml;
+          gGrid.dataset.built = '1';
+        }
+        var lGrid = document.getElementById(px + '-loss-grid');
+        if (lGrid && !lGrid.dataset.built) {
+          var lHtml = '';
+          for (var j = 1; j <= 5; j++) {
+            lHtml += '<div class="cmp-entry-field"><span class="cmp-entry-lbl">Loss ' + j + '</span>' +
+              '<input type="number" class="cmp-entry-inp cmp-entry-loss" id="' + px + '-loss-' + j + '" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta(\'' + px + '\')"></div>';
+          }
+          lGrid.innerHTML = lHtml;
+          lGrid.dataset.built = '1';
+        }
+      });
+    }
+    function loadCmpMetaFromCloud() {
+      return dbMetaGet().then(function(rows) {
+        var row = (rows && rows[0]) || {};
+        var gains = row.gains || [];
+        var losses = row.losses || [];
+        ['cmp','ops'].forEach(function(px) {
+          var b = document.getElementById(px + '-banca'); if (b) b.value = (row.banca != null ? row.banca : '');
+          var s = document.getElementById(px + '-stop-pct'); if (s) s.value = (row.stop_pct != null ? row.stop_pct : '');
+          var g = document.getElementById(px + '-gain-pct'); if (g) g.value = (row.gain_pct != null ? row.gain_pct : '');
+          for (var i = 1; i <= 5; i++) {
+            var eg = document.getElementById(px + '-entry-' + i); if (eg) eg.value = (gains[i-1] != null ? gains[i-1] : '');
+            var el = document.getElementById(px + '-loss-' + i); if (el) el.value = (losses[i-1] != null ? losses[i-1] : '');
+          }
+        });
+      }).catch(function(e) { showToast('Erro ao carregar meta do dia: ' + e.message, 'error'); });
+    }
+    var saveMetaDebounced = debounce(function() {
+      var banca = parseFloat(document.getElementById('cmp-banca').value);
+      var stopPct = parseFloat(document.getElementById('cmp-stop-pct').value);
+      var gainPct = parseFloat(document.getElementById('cmp-gain-pct').value);
+      var gains = [], losses = [];
+      for (var i = 1; i <= 5; i++) {
+        var vg = document.getElementById('cmp-entry-' + i).value;
+        var vl = document.getElementById('cmp-loss-' + i).value;
+        gains.push(vg === '' ? null : parseFloat(vg));
+        losses.push(vl === '' ? null : parseFloat(vl));
+      }
+      dbMetaSet({
+        banca: isNaN(banca) ? null : banca,
+        stop_pct: isNaN(stopPct) ? null : stopPct,
+        gain_pct: isNaN(gainPct) ? null : gainPct,
+        gains: gains,
+        losses: losses
+      }).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+    }, 600);
+    function calcCmpMeta(px) {
+      px = px || 'cmp';
+      var otherPx = px === 'cmp' ? 'ops' : 'cmp';
+      var banca = parseFloat(document.getElementById(px + '-banca').value) || 0;
+      var stopPct = parseFloat(document.getElementById(px + '-stop-pct').value) || 0;
+      var gainPct = parseFloat(document.getElementById(px + '-gain-pct').value) || 0;
+
+      var ob = document.getElementById(otherPx + '-banca'); if (ob) ob.value = document.getElementById(px + '-banca').value;
+      var os = document.getElementById(otherPx + '-stop-pct'); if (os) os.value = document.getElementById(px + '-stop-pct').value;
+      var og = document.getElementById(otherPx + '-gain-pct'); if (og) og.value = document.getElementById(px + '-gain-pct').value;
+
+      var stopVal = banca * (stopPct / 100);
+      var gainVal = banca * (gainPct / 100);
+      ['cmp','ops'].forEach(function(p) {
+        var sv = document.getElementById(p + '-stop-val'); if (sv) sv.textContent = fmtBRL(stopVal);
+        var gv = document.getElementById(p + '-gain-val'); if (gv) gv.textContent = fmtBRL(gainVal);
+      });
+
+      var totalGain = 0, totalLoss = 0;
+      for (var i = 1; i <= 5; i++) {
+        var elg = document.getElementById(px + '-entry-' + i);
+        var vg = Math.abs(parseFloat(elg.value) || 0);
+        if (!isNaN(vg)) totalGain += vg;
+        var oelg = document.getElementById(otherPx + '-entry-' + i);
+        if (oelg) oelg.value = elg.value;
+
+        var ell = document.getElementById(px + '-loss-' + i);
+        var vl = Math.abs(parseFloat(ell.value) || 0);
+        if (!isNaN(vl)) totalLoss += vl;
+        var oell = document.getElementById(otherPx + '-loss-' + i);
+        if (oell) oell.value = ell.value;
+      }
+      var total = totalGain - totalLoss;
+
+      ['cmp','ops'].forEach(function(p) {
+        var totalEl = document.getElementById(p + '-total-val');
+        if (!totalEl) return;
+        totalEl.textContent = (total >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(total));
+        totalEl.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
+      });
+
+      ['cmp','ops'].forEach(function(p) {
+        var fill = document.getElementById(p + '-meta-bar-fill');
+        var label = document.getElementById(p + '-meta-bar-label');
+        if (!fill || !label) return;
+
+        if (!banca || (!stopPct && !gainPct)) {
+          fill.style.width = '0%'; fill.style.background = 'var(--muted)';
+          label.textContent = 'Preencha a banca e as porcentagens para acompanhar';
+          return;
+        }
+
+        if (total >= 0) {
+          if (!gainVal) { fill.style.width = '0%'; fill.style.background = 'var(--muted)'; label.textContent = 'Defina sua meta de gain (%)'; return; }
+          var pct = Math.min((total / gainVal) * 100, 100);
+          fill.style.width = pct.toFixed(0) + '%';
+          fill.style.background = 'var(--bull)';
+          if (pct >= 100) label.innerHTML = '<span style="color:var(--bull);font-weight:800">&#127942; Meta de ganho atingida!</span>';
+          else label.textContent = pct.toFixed(0) + '% da meta de ganho alcan\u00e7ada';
+        } else {
+          if (!stopVal) { fill.style.width = '0%'; fill.style.background = 'var(--muted)'; label.textContent = 'Defina seu stop loss (%)'; return; }
+          var pctL = Math.min((Math.abs(total) / stopVal) * 100, 100);
+          fill.style.width = pctL.toFixed(0) + '%';
+          fill.style.background = 'var(--bear)';
+          if (pctL >= 100) label.innerHTML = '<span style="color:var(--bear);font-weight:800">&#9888;&#65039; Limite de perda atingido! Pare por hoje.</span>';
+          else label.textContent = pctL.toFixed(0) + '% do limite de perda atingido';
+        }
+      });
+
+      saveMetaDebounced();
+    }
+    function resetCmpMeta() {
+      showGenConfirm('Reiniciar o dia?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbMetaSet({ banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] })
+          .then(function() { return loadCmpMetaFromCloud(); })
+          .then(function() { calcCmpMeta('cmp'); showToast('Dia reiniciado!', 'success'); })
+          .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+    function exportCmpTradeDia() {
+      var records = [];
+      for (var i = 1; i <= 5; i++) {
+        var vg = parseFloat(document.getElementById('cmp-entry-' + i).value);
+        if (!isNaN(vg) && vg !== 0) {
+          records.push({ par:'TRADE DO DIA', dir:'compra', res:'gain', categoria:'daytrade', conta:'real', valor: Math.abs(vg), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+        }
+        var vl = parseFloat(document.getElementById('cmp-loss-' + i).value);
+        if (!isNaN(vl) && vl !== 0) {
+          records.push({ par:'TRADE DO DIA', dir:'venda', res:'stop', categoria:'daytrade', conta:'real', valor: Math.abs(vl), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+        }
+      }
+      if (!records.length) { showToast('Preencha ao menos uma entrada de Gain ou Loss.', 'error'); return; }
+      setLoading(true);
+      Promise.all(records.map(function(r) { return dbAdd(r); }))
+        .then(function() {
+          showToast('Trade do dia exportado para as estat\u00edsticas!', 'success');
+          return dbMetaSet({ gains: [], losses: [] });
+        })
+        .then(function() { return loadCmpMetaFromCloud(); })
+        .then(function() { calcCmpMeta('cmp'); updateStats(); })
+        .catch(function(e) { showToast('Erro ao exportar: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+
+    /* METAS DO MES (nuvem: metas_mes) */
+    var metamesCache = [];
+    function loadMetamesFromCloud() {
+      return dbMetamesList().then(function(rows) { metamesCache = rows || []; }).catch(function(e) { showToast('Erro ao carregar metas do m\u00eas: ' + e.message, 'error'); metamesCache = []; });
+    }
+    function metaMesRowHtml(px, m) {
+      return '<div class="cmp-metames-row">' +
+        '<input type="text" class="cmp-metames-desc" id="' + px + '-metames-desc-' + m.id + '" placeholder="ex: Pagar conta da TV / canais" value="' + escHtml(m.descricao||'') + '" oninput="updMetaMesField(\'' + px + '\',' + m.id + ',\'descricao\',this.value)">' +
+        '<input type="number" class="cmp-metames-valor" id="' + px + '-metames-valor-' + m.id + '" placeholder="0.00" step="0.01" value="' + (m.valor != null ? m.valor : '') + '" oninput="updMetaMesField(\'' + px + '\',' + m.id + ',\'valor\',this.value)">' +
+        '<button class="cmp-metames-del" onclick="delCmpMetaMes(' + m.id + ')">&#10005;</button>' +
+        '</div>';
+    }
+    function renderCmpMetasMes() {
+      var list = metamesCache;
+      ['cmp','ops'].forEach(function(px) {
+        var wrap = document.getElementById(px + '-metames-list');
+        if (!wrap) return;
+        if (!list.length) {
+          wrap.innerHTML = '<p class="cmp-hint" style="text-align:left;margin-bottom:0">Nenhuma meta ainda.</p>';
+        } else {
+          wrap.innerHTML = list.map(function(m) { return metaMesRowHtml(px, m); }).join('');
+        }
+      });
+      var total = list.reduce(function(s, m) { var v = parseFloat(m.valor); return s + (isNaN(v) ? 0 : v); }, 0);
+      ['cmp','ops'].forEach(function(px) {
+        var t = document.getElementById(px + '-metames-total');
+        if (t) t.textContent = fmtBRL(total);
+      });
+    }
+    var updMetaMesDebounceFns = {};
+    function updMetaMesField(px, id, field, val) {
+      var item = metamesCache.find(function(m) { return m.id === id; });
+      if (!item) return;
+      item[field] = val;
+      var otherPx = px === 'cmp' ? 'ops' : 'cmp';
+      var otherEl = document.getElementById(otherPx + '-metames-' + (field === 'descricao' ? 'desc' : 'valor') + '-' + id);
+      if (otherEl) otherEl.value = val;
+      var total = metamesCache.reduce(function(s, m) { var v = parseFloat(m.valor); return s + (isNaN(v) ? 0 : v); }, 0);
+      ['cmp','ops'].forEach(function(p) { var t = document.getElementById(p + '-metames-total'); if (t) t.textContent = fmtBRL(total); });
+
+      var key = 'meta_' + id;
+      if (!updMetaMesDebounceFns[key]) {
+        updMetaMesDebounceFns[key] = debounce(function() {
+          var it = metamesCache.find(function(m) { return m.id === id; });
+          if (!it) return;
+          var valorNum = parseFloat(it.valor);
+          dbMetamesUpd(id, { descricao: it.descricao || '', valor: isNaN(valorNum) ? null : valorNum })
+            .catch(function(e) { showToast('Erro ao salvar meta: ' + e.message, 'error'); });
+        }, 600);
+      }
+      updMetaMesDebounceFns[key]();
+    }
+    function addCmpMetaMes() {
+      setLoading(true);
+      dbMetamesAdd('', null).then(function(rows) {
+        var newRow = rows && rows[0];
+        if (newRow) metamesCache.push(newRow);
+        renderCmpMetasMes();
+      }).catch(function(e) { showToast('Erro ao adicionar meta: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function delCmpMetaMes(id) {
+      showGenConfirm('Excluir esta meta?', 'Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbMetamesDel(id).then(function() {
+          metamesCache = metamesCache.filter(function(m) { return m.id !== id; });
+          renderCmpMetasMes();
+          showToast('Meta removida.', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+
+    function refreshMetaPanel() {
+      return Promise.all([loadCmpMetaFromCloud(), loadMetamesFromCloud()]).then(function() {
+        calcCmpMeta('cmp');
+        renderCmpMetasMes();
+      });
+    }
+
+    function renderCompromisso() {
+      setLoading(true);
+      Promise.all([
+        loadCmpDias(),
+        dbCmpConfigGet().then(function(rows) {
+          var nome = (rows && rows[0] && rows[0].nome) || '';
+          var el = document.getElementById('cmp-nome');
+          if (el) el.value = nome;
+        }).catch(function() {}),
+        loadCmpMetaFromCloud(),
+        loadMetamesFromCloud()
+      ]).then(function() {
+        setLoading(false);
+        renderCmpDiasGrid();
+        calcCmpMeta('cmp');
+        renderCmpMetasMes();
+      }).catch(function(e) {
+        setLoading(false);
+        showToast('Erro ao carregar: ' + e.message, 'error');
+      });
     }
 
     /* UTIL */
@@ -892,7 +1937,13 @@ create policy "acesso_publico" on operacoes
     /* INIT */
     try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
     try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
-    if (!SUPA_URL || !SUPA_KEY) { document.getElementById('cfg-overlay').classList.add('show'); } else { renderList(); }
+    try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
+    if (!SUPA_URL || !SUPA_KEY) {
+      document.getElementById('cfg-overlay').classList.add('show');
+    } else {
+      renderList();
+      refreshMetaPanel();
+    }
   </script>
 </body>
 </html>
