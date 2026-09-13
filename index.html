@@ -50,9 +50,13 @@
     .img-thumb-wrap { position:relative; flex-shrink:0; width:80px; height:64px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
     .img-thumb-wrap img { width:100%; height:100%; object-fit:cover; }
     .img-thumb-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:var(--bear); border:none; color:#fff; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; padding:0; }
-    .img-add-zone { flex-shrink:0; width:64px; height:64px; border:2px dashed var(--border); border-radius:8px; background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; color:var(--muted); font-size:22px; transition:border-color .2s; }
+    .img-add-zone { flex-shrink:0; width:64px; height:64px; border:2px dashed var(--border); border-radius:8px; background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; color:var(--muted); font-size:22px; transition:border-color .2s; outline:none; }
     .img-add-zone:hover,.img-add-zone:active { border-color:var(--blue); }
     .img-add-zone span { font-size:9px; text-transform:uppercase; letter-spacing:.5px; }
+    .img-paste-zone { flex-shrink:0; width:64px; height:64px; border:2px solid var(--bull); border-radius:8px; background:var(--bull-dim); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; color:var(--bull); font-size:20px; transition:box-shadow .2s; outline:none; }
+    .img-paste-zone:hover { box-shadow:0 0 0 2px rgba(0,230,118,.25); }
+    .img-paste-zone:focus { box-shadow:0 0 0 3px rgba(0,230,118,.4); }
+    .img-paste-zone span { font-size:9px; text-transform:uppercase; letter-spacing:.5px; }
     /* CAROUSEL */
     .carousel-wrap { position:relative; width:100%; background:#000; overflow:hidden; }
     .carousel-img-container { width:100%; min-height:200px; display:flex; align-items:center; justify-content:center; }
@@ -480,7 +484,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
         <input type="file" id="img-file" accept="image/*" multiple>
 
         <!-- Multi-image gallery -->
-        <label class="f-lbl">Prints da Operação</label>
+        <label class="f-lbl" style="color:var(--bull)">DI&#193;RIO DE OPERA&#199;&#213;ES</label>
         <div class="img-gallery-row" id="img-gallery"></div>
 
         <div class="f-row">
@@ -530,6 +534,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
           <label class="f-lbl" for="inp-nota">Anota&#231;&#245;es</label>
           <textarea class="f-area" id="inp-nota" rows="3" placeholder="O que voc&#234; observou nessa opera&#231;&#227;o?"></textarea>
         </div>
+        <button class="btn-save" onclick="saveOp()" style="margin-bottom:18px">&#128190; SALVAR</button>
 
         <div class="cmp-card" style="margin-top:4px">
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
@@ -662,6 +667,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
           </div>
           <p class="cmp-proposito"><strong>Prop&#243;sito:</strong> Honrar a Deus atrav&#233;s das minhas decis&#245;es, inclusive financeiras.</p>
           <div class="cmp-verse">&#8220;Reconhe&#231;a-o em todos os seus caminhos, e ele endireitar&#225; as suas veredas.&#8221;<span class="cmp-verse-ref">Prov&#233;rbios 3:6 &#8212; NVI</span></div>
+          <div class="cmp-verse" style="margin-top:12px">&#8220;Pois Deus n&#227;o nos deu esp&#237;rito de covardia, mas de poder, de amor e de equil&#237;brio.&#8221;<span class="cmp-verse-ref">2 Tim&#243;teo 1:7 &#8212; NVI</span></div>
         </div>
 
         <div class="cmp-card">
@@ -673,6 +679,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
           <ul class="cmp-list">
             <li>Colocar Deus em primeiro lugar, honrando com meu compromisso.</li>
             <li>Ter dom&#237;nio pr&#243;prio.</li>
+            <li>Compromisso em acertar o movimento e n&#227;o em ganhar dinheiro.</li>
             <li>N&#227;o operar movida pela gan&#226;ncia.</li>
             <li>N&#227;o tentar recuperar uma perda imediatamente.</li>
             <li>Respeitar meu limite de perda.</li>
@@ -719,25 +726,13 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
 
         <div class="cmp-card">
           <div class="cmp-sec-title">&#128170; Dom&#237;nio Pr&#243;prio</div>
-          <div class="cmp-verse cmp-verse-sm">&#8220;Pois Deus n&#227;o nos deu esp&#237;rito de covardia, mas de poder, de amor e de equil&#237;brio.&#8221;<span class="cmp-verse-ref">2 Tim&#243;teo 1:7 &#8212; NVI</span></div>
-          <p class="cmp-p">Dom&#237;nio pr&#243;prio significa saber parar. Parar quando:</p>
-          <ul class="cmp-list">
-            <li>j&#225; atingi minha meta;</li>
-            <li>atingi meu limite de perda;</li>
-            <li>estou cansada;</li>
-            <li>estou ansiosa;</li>
-            <li>estou tentando recuperar dinheiro;</li>
-            <li>estou com raiva;</li>
-            <li>estou querendo &#8220;s&#243; mais uma opera&#231;&#227;o&#8221;;</li>
-            <li>minha concentra&#231;&#227;o n&#227;o est&#225; boa.</li>
-          </ul>
           <p class="cmp-rule">EU N&#195;O PRECISO OPERAR.</p>
         </div>
 
         <div class="cmp-card">
           <div class="cmp-sec-title">&#129497;&#8205;&#9792;&#65039; Disciplina</div>
           <div class="cmp-verse cmp-verse-sm">&#8220;Todos os que competem nos jogos se submetem a um treinamento rigoroso para obter uma coroa que logo perece, mas n&#243;s o fazemos para ganhar uma coroa imperec&#237;vel.&#8221;<span class="cmp-verse-ref">1 Cor&#237;ntios 9:25 &#8212; NVI</span></div>
-          <p class="cmp-p">O trader disciplinado n&#227;o &#233; aquele que opera muito. &#201; aquele que consegue obedecer &#224;s pr&#243;prias regras mesmo quando sente vontade de quebr&#225;-las.</p>
+          <p class="cmp-p">O trader disciplinado n&#227;o &#233; aquele que opera muito, porque se n&#227;o se torna jogo. O trader disciplinado &#233; aquele que consegue obedecer &#224;s pr&#243;prias regras mesmo quando sente vontade de quebr&#225;-las.</p>
         </div>
 
         <div class="cmp-card">
@@ -1010,6 +1005,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
       var html = selImgs.map(function(img, i) {
         return '<div class="img-thumb-wrap"><img src="' + img + '" alt="foto"><button class="img-thumb-del" onclick="event.stopPropagation();removeFormImg(' + i + ')">&#10005;</button></div>';
       }).join('');
+      html += '<div class="img-paste-zone" id="img-paste-zone" tabindex="0"><span style="font-size:20px">&#128203;</span><span>colar</span></div>';
       html += '<div class="img-add-zone" onclick="document.getElementById(&quot;img-file&quot;).click()"><span style="font-size:22px">+</span><span>foto</span></div>';
       gallery.innerHTML = html;
     }
@@ -1028,6 +1024,35 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
         renderFormImages();
       });
       e.target.value = '';
+    });
+
+    document.addEventListener('paste', function(e) {
+      var tab = document.getElementById('tab-ops');
+      if (!tab || !tab.classList.contains('active')) return;
+      var active = document.activeElement;
+      if (!active || active.id !== 'img-paste-zone') return;
+      var items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+      if (!items) return;
+      var hasImage = false;
+      for (var k = 0; k < items.length; k++) { if (items[k].type && items[k].type.indexOf('image') !== -1) { hasImage = true; break; } }
+      if (!hasImage) return;
+      for (var i2 = 0; i2 < items.length; i2++) {
+        if (items[i2].type && items[i2].type.indexOf('image') !== -1) {
+          var blob = items[i2].getAsFile();
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            compressImage(ev.target.result).then(function(compressed) {
+              selImgs = selImgs.concat([compressed]);
+              renderFormImages();
+              var z = document.getElementById('img-paste-zone'); if (z) z.focus();
+              showToast('Print colado com sucesso!', 'success');
+            });
+          };
+          reader.readAsDataURL(blob);
+          e.preventDefault();
+          break;
+        }
+      }
     });
 
     /* CAROUSEL (VIEW MODE) */
