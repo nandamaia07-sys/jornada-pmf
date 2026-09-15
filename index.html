@@ -329,6 +329,13 @@
     .opm-title-inp::placeholder { color:#3f7a55; text-transform:uppercase; }
     .opm-entry-del { width:38px; height:38px; flex-shrink:0; border-radius:9px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .opm-entry-del:hover { opacity:.85; }
+    .opm-tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:0; }
+    .opm-titles-card { border-color:var(--bull); background:rgba(0,230,118,.04); }
+    .opm-tags-row:empty::before { content:'Nenhum titulo ainda. Os titulos aparecerao aqui automaticamente.'; font-size:12px; color:var(--muted); font-style:italic; }
+    .opm-tag-btn { padding:5px 12px; border:1px solid var(--bull); border-radius:20px; background:var(--bull-dim); color:var(--bull); font-size:11px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:.3px; transition:all .15s; }
+    .opm-tag-btn:hover { opacity:.8; }
+    .opm-tag-btn.active { background:var(--bull); color:#0b0b12; }
+    .opm-clear-search-btn { padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:var(--surface2); color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; }
 
     /* DESKTOP */
     @media (min-width: 900px) {
@@ -340,8 +347,11 @@
       #tab-stats { overflow-y:auto; height:100%; }
       #tab-compromisso { overflow-y:auto; height:100%; }
       #tab-operacional { overflow-y:auto; height:100%; }
+      #tab-operacional .cmp-wrap { max-width:1400px; }
       .op-method-layout { flex-direction:row; align-items:stretch; }
-      .op-method-img-zone { min-height:100%; }
+      .op-method-img-col { flex:0 0 60%; }
+      .op-method-notes-col { flex:1; }
+      .op-method-img-zone { min-height:60vh; }
       .stats-wrap { max-width:1100px; margin:0 auto; padding:20px; }
       .stats-grid { grid-template-columns:repeat(4,1fr); } .scard.full { grid-column:auto; }
       .modal { overflow:hidden; background:rgba(0,0,0,.78); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px; }
@@ -855,6 +865,13 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
           <div class="cmp-sec-title">&#129517; Meu M&#233;todo Operacional</div>
           <p class="cmp-hint" style="margin-bottom:0;text-align:left">Adicione quantos prints e anota&#231;&#245;es quiser. Toque na imagem para enviar, ou foque nela (toque) e cole (Ctrl+V) uma imagem copiada.</p>
         </div>
+
+        <div class="cmp-card opm-titles-card">
+          <div class="cmp-sec-title">&#128204; Meus T&#237;tulos</div>
+          <input type="text" class="f-inp" id="opm-search" placeholder="Buscar por t&#237;tulo... ex: MARCA&#199;&#213;ES" oninput="filterOpmEntries(this.value)" style="margin-bottom:12px">
+          <div class="opm-tags-row" id="opm-tags-row"></div>
+        </div>
+
         <div id="opm-entries-list"></div>
         <button class="cmp-add-meta-btn" onclick="addOpmEntry()">&#43; Adicionar Print com Anota&#231;&#227;o</button>
       </div>
@@ -1564,14 +1581,47 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
         '</div>' +
       '</div>';
     }
+    var opmSearchTerm = '';
+    function filterOpmEntries(term) {
+      opmSearchTerm = (term || '').trim().toUpperCase();
+      renderOpmEntries();
+    }
+    function selectOpmTag(t) {
+      var input = document.getElementById('opm-search');
+      if (input) input.value = (input.value.toUpperCase() === t.toUpperCase()) ? '' : t;
+      filterOpmEntries(input ? input.value : t);
+    }
+    function renderOpmTags() {
+      var wrap = document.getElementById('opm-tags-row');
+      if (!wrap) return;
+      var titles = [];
+      opmEntriesCache.forEach(function(e) {
+        var t = (e.titulo || '').trim();
+        if (t && titles.indexOf(t) === -1) titles.push(t);
+      });
+      if (!titles.length) { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = titles.map(function(t) {
+        var isActive = opmSearchTerm && t.toUpperCase() === opmSearchTerm;
+        return '<button class="opm-tag-btn' + (isActive ? ' active' : '') + '" onclick="selectOpmTag(\'' + t.replace(/'/g, "\\'") + '\')">' + escHtml(t) + '</button>';
+      }).join('');
+    }
     function renderOpmEntries() {
       var wrap = document.getElementById('opm-entries-list');
       if (!wrap) return;
-      if (!opmEntriesCache.length) {
-        wrap.innerHTML = '<div class="empty"><div class="empty-ico">&#129517;</div><p>Nenhum print adicionado ainda. Toque em &#8220;Adicionar Print com Anota\u00e7\u00e3o&#8221; para come\u00e7ar.</p></div>';
+      renderOpmTags();
+      var list = opmEntriesCache;
+      if (opmSearchTerm) {
+        list = list.filter(function(e) { return (e.titulo || '').toUpperCase().indexOf(opmSearchTerm) !== -1; });
+      }
+      if (!list.length) {
+        if (!opmEntriesCache.length) {
+          wrap.innerHTML = '<div class="empty"><div class="empty-ico">&#129517;</div><p>Nenhum print adicionado ainda. Toque em &#8220;Adicionar Print com Anota\u00e7\u00e3o&#8221; para come\u00e7ar.</p></div>';
+        } else {
+          wrap.innerHTML = '<div class="empty"><div class="empty-ico">&#128269;</div><p>Nenhum resultado para esse t\u00edtulo.</p></div>';
+        }
         return;
       }
-      wrap.innerHTML = opmEntriesCache.map(function(e) { return opmEntryHtml(e); }).join('');
+      wrap.innerHTML = list.map(function(e) { return opmEntryHtml(e); }).join('');
     }
     function refreshOpmZone(id) {
       var item = opmEntriesCache.find(function(e) { return e.id === id; });
@@ -1583,6 +1633,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
       var item = opmEntriesCache.find(function(e) { return e.id === id; });
       if (!item) return;
       item[field] = val;
+      if (field === 'titulo') renderOpmTags();
       var key = 'opm_' + id;
       if (!opmFieldDebounceFns[key]) {
         opmFieldDebounceFns[key] = debounce(function() {
