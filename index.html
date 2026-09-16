@@ -336,6 +336,30 @@
     .opm-tag-btn:hover { opacity:.8; }
     .opm-tag-btn.active { background:var(--bull); color:#0b0b12; }
     .opm-clear-search-btn { padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:var(--surface2); color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; }
+    /* MEMORIAS / EVOLUCAO - LINHA DO TEMPO */
+    .timeline-wrap { position:relative; margin-top:4px; }
+    .timeline-item { position:relative; padding-left:30px; padding-bottom:18px; border-left:2px solid var(--border); margin-left:10px; }
+    .timeline-item.last { border-left:2px solid transparent; padding-bottom:0; }
+    .timeline-dot { position:absolute; left:-9px; top:2px; width:16px; height:16px; border-radius:50%; background:var(--bull); border:3px solid var(--bg); box-shadow:0 0 0 1px var(--bull); }
+    .timeline-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .timeline-top-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+    .timeline-year-inp { width:100px; flex-shrink:0; background:#1c1c34; border:1px solid #31314f; border-radius:8px; padding:10px 10px; color:var(--bull); font-family:var(--mono); font-weight:900; font-size:16px; outline:none; text-align:center; }
+    .timeline-year-inp:focus { border-color:var(--bull); }
+    .timeline-year-inp::placeholder { color:#4a7a5e; }
+    .timeline-title-inp { flex:1; background:#1c1c34; border:1px solid #31314f; border-radius:8px; padding:10px 12px; color:var(--text); font-size:13px; font-weight:700; outline:none; font-family:var(--ui); }
+    .timeline-title-inp:focus { border-color:var(--blue); }
+    .timeline-title-inp::placeholder { color:var(--muted); font-weight:400; }
+    .timeline-img-zone { width:100%; min-height:140px; border:2px dashed var(--border); border-radius:10px; background:#1c1c34; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; position:relative; overflow:hidden; margin-bottom:10px; outline:none; transition:border-color .2s; }
+    .timeline-img-zone:hover { border-color:var(--blue); }
+    .timeline-img-zone:focus { border-color:var(--bull); box-shadow:0 0 0 3px rgba(0,230,118,.15); }
+    .timeline-img-zone img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+    .timeline-img-placeholder-ico { font-size:26px; opacity:.4; }
+    .timeline-img-placeholder-txt { font-size:11px; color:var(--muted); text-align:center; padding:0 16px; }
+    .timeline-textarea { width:100%; background:#1c1c34; border:1px solid #31314f; border-radius:9px; padding:12px 13px; color:var(--text); font-size:13px; font-family:var(--ui); outline:none; resize:none; line-height:1.5; min-height:70px; }
+    .timeline-textarea:focus { border-color:var(--blue); }
+    .timeline-textarea::placeholder { color:var(--muted); }
+    .timeline-del-btn { width:36px; height:36px; flex-shrink:0; border-radius:8px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .timeline-del-btn:hover { opacity:.85; }
 
     /* DESKTOP */
     @media (min-width: 900px) {
@@ -347,6 +371,7 @@
       #tab-stats { overflow-y:auto; height:100%; }
       #tab-compromisso { overflow-y:auto; height:100%; }
       #tab-operacional { overflow-y:auto; height:100%; }
+      #tab-memorias { overflow-y:auto; height:100%; }
       #tab-operacional .cmp-wrap { max-width:1400px; }
       .op-method-layout { flex-direction:row; align-items:stretch; }
       .op-method-img-col { flex:0 0 60%; }
@@ -457,6 +482,18 @@ create table ganhos_mensais (
 );
 alter table ganhos_mensais enable row level security;
 create policy "acesso_publico_ganhos" on ganhos_mensais
+  for all using (true) with check (true);
+
+create table memorias_evolucao (
+  id bigserial primary key,
+  ano int,
+  titulo text,
+  texto text,
+  imagem text,
+  criado_em timestamptz default now()
+);
+alter table memorias_evolucao enable row level security;
+create policy "acesso_publico_memorias" on memorias_evolucao
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -475,6 +512,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
       <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Estat&#237;sticas</button>
       <button class="hdr-tab" data-tab="compromisso" onclick="switchTab('compromisso')">&#128591; Compromisso</button>
       <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Operacional</button>
+      <button class="hdr-tab" data-tab="memorias" onclick="switchTab('memorias')">&#128220; Mem&#243;rias</button>
     </nav>
     <button class="hdr-settings" onclick="openConfig()">&#9881;</button>
   </header>
@@ -876,6 +914,18 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
         <button class="cmp-add-meta-btn" onclick="addOpmEntry()">&#43; Adicionar Print com Anota&#231;&#227;o</button>
       </div>
     </div>
+
+    <!-- MEMORIAS / EVOLUCAO -->
+    <div class="tab" id="tab-memorias">
+      <div class="cmp-wrap">
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128220; Mem&#243;rias &amp; Evolu&#231;&#227;o no Trade</div>
+          <p class="cmp-hint" style="margin-bottom:0;text-align:left">Registre os marcos da sua jornada &#8212; ano, o que viveu ou aprendeu, e um print daquela &#233;poca. Fica organizado em ordem cronol&#243;gica.</p>
+        </div>
+        <div class="timeline-wrap" id="mem-timeline-list"></div>
+        <button class="cmp-add-meta-btn" onclick="addMemEntry()">&#43; Adicionar Mem&#243;ria</button>
+      </div>
+    </div>
   </div>
 
   <nav class="bnav">
@@ -883,6 +933,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
     <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Estat&#237;sticas</button>
     <button class="bnav-btn" data-tab="compromisso" onclick="switchTab('compromisso')"><span class="ico">&#128591;</span>Compromisso</button>
     <button class="bnav-btn" data-tab="operacional" onclick="switchTab('operacional')"><span class="ico">&#129517;</span>Operacional</button>
+    <button class="bnav-btn" data-tab="memorias" onclick="switchTab('memorias')"><span class="ico">&#128220;</span>Mem&#243;rias</button>
   </nav>
 
   <!-- Modal -->
@@ -1487,6 +1538,7 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
       if (tab === 'stats') updateStats();
       if (tab === 'compromisso') renderCompromisso();
       if (tab === 'operacional') loadOperacional();
+      if (tab === 'memorias') loadMemorias();
       if (tab === 'ops') refreshMetaPanel();
     }
 
@@ -1522,6 +1574,11 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
       return supaReq('ganhos_mensais?on_conflict=mes', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ mes: mes, valor: valor }]) });
     }
     function dbGanhoDelete(mes) { return supaReq('ganhos_mensais?mes=eq.' + mes, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbMemList() { return supaReq('memorias_evolucao?select=id,ano,titulo,texto,imagem&order=ano.asc.nullslast'); }
+    function dbMemAdd() { return supaReq('memorias_evolucao', { method: 'POST', body: JSON.stringify({ ano: null, titulo: '', texto: '', imagem: null }) }); }
+    function dbMemUpd(id, fields) { return supaReq('memorias_evolucao?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
+    function dbMemDel(id) { return supaReq('memorias_evolucao?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
     function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
@@ -1768,6 +1825,164 @@ create policy "acesso_publico_ganhos" on ganhos_mensais
           if (row) { opmEntriesCache.push(row); renderOpmEntries(); doPaste(row.id); }
         }).catch(function(err) { showToast('Erro: ' + err.message, 'error'); })
           .finally(function() { setLoading(false); });
+      }
+    });
+
+    /* MEMORIAS / EVOLUCAO NO TRADE (nuvem: memorias_evolucao) */
+    var memEntriesCache = [];
+    function sortMemCache() {
+      memEntriesCache.sort(function(a, b) {
+        var av = (a.ano === null || a.ano === undefined) ? Infinity : a.ano;
+        var bv = (b.ano === null || b.ano === undefined) ? Infinity : b.ano;
+        return av - bv;
+      });
+    }
+    function loadMemorias() {
+      setLoading(true);
+      dbMemList().then(function(rows) {
+        memEntriesCache = rows || [];
+        sortMemCache();
+        renderMemorias();
+      }).catch(function(e) { showToast('Erro ao carregar mem\u00f3rias: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function memImgZoneHtml(id, img) {
+      if (img) {
+        return '<img src="' + img + '" alt="mem\u00f3ria">' +
+          '<button class="op-method-img-del" onclick="event.stopPropagation();clearMemImage(' + id + ')" title="Remover imagem">&#10005;</button>';
+      }
+      return '<span class="timeline-img-placeholder-ico">&#128248;</span>' +
+        '<span class="timeline-img-placeholder-txt">Toque para enviar um print, ou foque aqui e cole (Ctrl+V)</span>';
+    }
+    function memEntryHtml(e, isLast) {
+      var id = e.id;
+      return '<div class="timeline-item' + (isLast ? ' last' : '') + '">' +
+        '<div class="timeline-dot"></div>' +
+        '<div class="timeline-card">' +
+          '<div class="timeline-top-row">' +
+            '<input type="number" class="timeline-year-inp" id="mem-ano-' + id + '" placeholder="Ano" value="' + (e.ano != null ? e.ano : '') + '" oninput="updMemField(' + id + ',\'ano\',this.value)">' +
+            '<input type="text" class="timeline-title-inp" id="mem-titulo-' + id + '" placeholder="T\u00edtulo curto" value="' + escHtml(e.titulo||'') + '" oninput="updMemField(' + id + ',\'titulo\',this.value)">' +
+            '<button class="timeline-del-btn" onclick="delMemEntry(' + id + ')" title="Excluir">&#128465;&#65039;</button>' +
+          '</div>' +
+          '<input type="file" id="mem-file-' + id + '" accept="image/*" style="display:none" onchange="handleMemFileChange(' + id + ', this)">' +
+          '<div class="timeline-img-zone" id="mem-imgzone-' + id + '" tabindex="0" data-idx="' + id + '" onclick="document.getElementById(\'mem-file-' + id + '\').click()">' + memImgZoneHtml(id, e.imagem) + '</div>' +
+          '<textarea class="timeline-textarea" id="mem-texto-' + id + '" placeholder="O que voc\u00ea viveu ou aprendeu nesse momento?" oninput="updMemField(' + id + ',\'texto\',this.value)">' + escHtml(e.texto||'') + '</textarea>' +
+        '</div>' +
+      '</div>';
+    }
+    function renderMemorias() {
+      var wrap = document.getElementById('mem-timeline-list');
+      if (!wrap) return;
+      if (!memEntriesCache.length) {
+        wrap.innerHTML = '<div class="empty"><div class="empty-ico">&#128220;</div><p>Nenhuma mem\u00f3ria registrada ainda. Toque em &#8220;Adicionar Mem\u00f3ria&#8221; para come\u00e7ar sua linha do tempo.</p></div>';
+        return;
+      }
+      wrap.innerHTML = memEntriesCache.map(function(e, i) { return memEntryHtml(e, i === memEntriesCache.length - 1); }).join('');
+    }
+    var memFieldDebounceFns = {};
+    function updMemField(id, field, val) {
+      var item = memEntriesCache.find(function(e) { return e.id === id; });
+      if (!item) return;
+      item[field] = field === 'ano' ? (val === '' ? null : val) : val;
+      var key = 'mem_' + id;
+      if (!memFieldDebounceFns[key]) {
+        memFieldDebounceFns[key] = debounce(function() {
+          var it = memEntriesCache.find(function(e) { return e.id === id; });
+          if (!it) return;
+          var anoNum = parseInt(it.ano, 10);
+          dbMemUpd(id, { ano: isNaN(anoNum) ? null : anoNum, titulo: it.titulo || '', texto: it.texto || '' })
+            .catch(function(err) { showToast('Erro ao salvar: ' + err.message, 'error'); });
+        }, 600);
+      }
+      memFieldDebounceFns[key]();
+    }
+    function addMemEntry() {
+      setLoading(true);
+      dbMemAdd().then(function(rows) {
+        var row = rows && rows[0];
+        if (row) { memEntriesCache.push(row); sortMemCache(); }
+        renderMemorias();
+      }).catch(function(e) { showToast('Erro ao adicionar: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function delMemEntry(id) {
+      showGenConfirm('Excluir esta mem\u00f3ria?', 'Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbMemDel(id).then(function() {
+          memEntriesCache = memEntriesCache.filter(function(e) { return e.id !== id; });
+          renderMemorias();
+          showToast('Removido.', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
+    function refreshMemZone(id) {
+      var item = memEntriesCache.find(function(e) { return e.id === id; });
+      var zone = document.getElementById('mem-imgzone-' + id);
+      if (zone && item) zone.innerHTML = memImgZoneHtml(id, item.imagem);
+    }
+    function saveMemImage(id) {
+      var item = memEntriesCache.find(function(e) { return e.id === id; });
+      if (!item) return Promise.resolve();
+      return dbMemUpd(id, { imagem: item.imagem || null });
+    }
+    function clearMemImage(id) {
+      var item = memEntriesCache.find(function(e) { return e.id === id; });
+      if (!item || !item.imagem) return;
+      item.imagem = null;
+      refreshMemZone(id);
+      setLoading(true);
+      saveMemImage(id).then(function() { showToast('Imagem removida.', 'success'); })
+        .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function handleMemFileChange(id, inputEl) {
+      var file = inputEl.files[0]; if (!file) return;
+      setLoading(true);
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        compressImage(ev.target.result).then(function(compressed) {
+          var item = memEntriesCache.find(function(e) { return e.id === id; });
+          if (!item) return;
+          item.imagem = compressed;
+          refreshMemZone(id);
+          return saveMemImage(id);
+        }).then(function() { showToast('Print salvo!', 'success'); })
+          .catch(function(e) { showToast('Erro ao enviar imagem: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      };
+      reader.readAsDataURL(file);
+      inputEl.value = '';
+    }
+
+    document.addEventListener('paste', function(e) {
+      var tab = document.getElementById('tab-memorias');
+      if (!tab || !tab.classList.contains('active')) return;
+      var active = document.activeElement;
+      if (!active || !active.classList || !active.classList.contains('timeline-img-zone') || active.dataset.idx === undefined) return;
+      var id = parseInt(active.dataset.idx, 10);
+      var items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+      if (!items) return;
+      for (var i2 = 0; i2 < items.length; i2++) {
+        if (items[i2].type && items[i2].type.indexOf('image') !== -1) {
+          var blob = items[i2].getAsFile();
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            compressImage(ev.target.result).then(function(compressed) {
+              var item = memEntriesCache.find(function(e) { return e.id === id; });
+              if (!item) return;
+              item.imagem = compressed;
+              refreshMemZone(id);
+              setLoading(true);
+              saveMemImage(id).then(function() { showToast('Print colado com sucesso!', 'success'); })
+                .catch(function(err) { showToast('Erro: ' + err.message, 'error'); })
+                .finally(function() { setLoading(false); });
+            });
+          };
+          reader.readAsDataURL(blob);
+          e.preventDefault();
+          break;
+        }
       }
     });
 
