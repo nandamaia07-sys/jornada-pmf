@@ -2636,4 +2636,31 @@ create policy "acesso_publico_banca_historico" on banca_historico
       ctx.strokeStyle = '#00e676'; ctx.lineWidth = s*.075; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.beginPath(); ctx.moveTo(s*.12,s*.70); ctx.lineTo(s*.30,s*.46); ctx.lineTo(s*.50,s*.58); ctx.lineTo(s*.72,s*.26); ctx.lineTo(s*.88,s*.40); ctx.stroke();
       ctx.fillStyle = '#00e676'; ctx.beginPath(); ctx.arc(s*.88,s*.40,s*.055,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#4d7fff'; ctx.font = '900 '+Math.round(s*.19)+'px system
+      ctx.fillStyle = '#4d7fff'; ctx.font = '900 '+Math.round(s*.19)+'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('PMF',s/2,s*.97);
+      return c.toDataURL('image/png');
+    }
+    function setupPWA() {
+      var icon = generateIcon(512); document.getElementById('apple-icon').href = icon;
+      var manifest = { name:'Jornada PMF', short_name:'Jornada PMF', description:'Diário de operações de day trade', start_url:'./', scope:'./', display:'standalone', background_color:'#0b0b12', theme_color:'#0b0b12', orientation:'portrait-primary', icons:[{src:generateIcon(192),sizes:'192x192',type:'image/png'},{src:icon,sizes:'512x512',type:'image/png',purpose:'any maskable'}] };
+      var blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+    }
+    window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').classList.add('show'); });
+    window.addEventListener('appinstalled', function() { document.getElementById('install-banner').classList.remove('show'); deferredPrompt = null; });
+    function installApp() { if (!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(function() { deferredPrompt = null; document.getElementById('install-banner').classList.remove('show'); }); }
+    function dismissBanner() { document.getElementById('install-banner').classList.remove('show'); }
+
+    /* INIT */
+    try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
+    try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
+    try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
+    try { var diInit = document.getElementById('inp-data'); if (diInit) diInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
+    if (!SUPA_URL || !SUPA_KEY) {
+      document.getElementById('cfg-overlay').classList.add('show');
+    } else {
+      renderList();
+      refreshMetaPanel();
+    }
+  </script>
+</body>
+</html>
