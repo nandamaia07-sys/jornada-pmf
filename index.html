@@ -128,6 +128,12 @@
     /* STATS */
     .stats-wrap { padding:14px; }
     .stats-conta-info { text-align:center; font-size:12px; font-weight:700; color:var(--bull); background:var(--bull-dim); border:1px solid var(--bull); border-radius:10px; padding:10px 14px; margin-bottom:16px; }
+    .stats-date-filter-row { display:flex; gap:8px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap; }
+    .stats-date-field { flex:1; min-width:100px; }
+    .stats-date-select { width:100%; background:#1c1c34; border:1px solid #31314f; border-radius:9px; padding:11px 10px; color:var(--text); font-size:12px; font-weight:700; outline:none; font-family:var(--ui); }
+    .stats-date-select:focus { border-color:var(--blue); }
+    .stats-date-clear-btn { padding:11px 14px; border:1px solid var(--border); border-radius:9px; background:var(--surface2); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+    .stats-date-clear-btn:hover { border-color:var(--bear); color:var(--bear); }
     .stats-actions-row { display:flex; gap:8px; margin-bottom:16px; }
     .stats-action-btn { flex:1; padding:10px 6px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text); font-size:11px; font-weight:700; cursor:pointer; text-align:center; transition:all .15s; }
     .stats-action-btn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); }
@@ -692,6 +698,30 @@ create policy "acesso_publico_banca_historico" on banca_historico
     <div class="tab" id="tab-stats">
       <div class="stats-wrap">
         <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
+
+        <div class="stats-date-filter-row">
+          <div class="stats-date-field">
+            <label class="f-lbl">Ano</label>
+            <select class="stats-date-select" id="stats-filter-ano" onchange="applyStatsDateFilter()">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="stats-date-field">
+            <label class="f-lbl">M&#234;s</label>
+            <select class="stats-date-select" id="stats-filter-mes" onchange="applyStatsDateFilter()">
+              <option value="">Todos</option>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="stats-date-field">
+            <label class="f-lbl">Data Espec&#237;fica</label>
+            <input type="date" class="stats-date-select" id="stats-filter-dia" onchange="applyStatsDateFilter()">
+          </div>
+          <button class="stats-date-clear-btn" onclick="clearStatsDateFilter()">&#10005; Limpar</button>
+        </div>
         <div class="stats-actions-row">
           <button class="stats-action-btn" id="stats-undo-btn" onclick="undoStats()" disabled>&#8630; Voltar</button>
           <button class="stats-action-btn" id="stats-redo-btn" onclick="redoStats()" disabled>&#8631; Refazer</button>
@@ -706,7 +736,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
               <strong id="s-banca-val">R$ 0,00</strong>
             </div>
             <div class="stats-banca-box">
-              <span>Resultado do &#218;ltimo Dia</span>
+              <span>Resultado Acumulado</span>
               <strong id="s-banca-resultado">&#8212;</strong>
             </div>
           </div>
@@ -1519,22 +1549,30 @@ create policy "acesso_publico_banca_historico" on banca_historico
     function updateBancaCard() {
       var card = document.getElementById('s-banca-card');
       if (!card) return;
-      dbBancaHistList().then(function(rows) {
-        rows = rows || [];
-        if (!rows.length) { card.style.display = 'none'; return; }
+      Promise.all([dbMetaGet(), dbList(), dbBancaHistList().catch(function() { return []; })]).then(function(results) {
+        var metaRow = (results[0] && results[0][0]) || {};
+        var ops = results[1] || [];
+        var histRows = results[2] || [];
+        var banca = parseFloat(metaRow.banca);
+        var hasBanca = !isNaN(banca) && banca > 0;
+        if (!hasBanca && !histRows.length) { card.style.display = 'none'; return; }
         card.style.display = 'block';
-        var ultima = rows[0];
-        document.getElementById('s-banca-val').textContent = fmtBRL(parseFloat(ultima.banca) || 0);
+        var bancaToShow = hasBanca ? banca : parseFloat(histRows[0].banca) || 0;
+        document.getElementById('s-banca-val').textContent = fmtBRL(bancaToShow);
+
+        var exportados = ops.filter(function(o) { return o.origem === 'exportado' && o.conta === 'real'; });
+        var totalResultado = exportados.reduce(function(s, o) {
+          var v = parseFloat(o.valor) || 0;
+          return s + (o.res === 'gain' ? v : -v);
+        }, 0);
+        var pct = bancaToShow > 0 ? (totalResultado / bancaToShow) * 100 : null;
         var resEl = document.getElementById('s-banca-resultado');
-        var r = parseFloat(ultima.resultado);
-        if (isNaN(r)) { resEl.textContent = '\u2014'; resEl.className = ''; }
-        else {
-          var pctTxt = (ultima.percentual != null && !isNaN(parseFloat(ultima.percentual))) ? ' (' + (r >= 0 ? '+' : '') + parseFloat(ultima.percentual).toFixed(1) + '%)' : '';
-          resEl.textContent = (r >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(r)) + pctTxt;
-          resEl.className = r > 0 ? 'pos' : (r < 0 ? 'neg' : '');
-        }
+        var pctTxt = (pct !== null && !isNaN(pct)) ? ' (' + (totalResultado >= 0 ? '+' : '') + pct.toFixed(1) + '%)' : '';
+        resEl.textContent = (totalResultado >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(totalResultado)) + pctTxt;
+        resEl.className = totalResultado > 0 ? 'pos' : (totalResultado < 0 ? 'neg' : '');
+
         var histWrap = document.getElementById('s-banca-hist-list');
-        histWrap.innerHTML = rows.slice(0, 15).map(function(row) {
+        histWrap.innerHTML = histRows.slice(0, 15).map(function(row) {
           var d = new Date(row.ts);
           var dateTxt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
           var rv = parseFloat(row.resultado);
@@ -1546,6 +1584,31 @@ create policy "acesso_publico_banca_historico" on banca_historico
         }).join('');
       }).catch(function() { card.style.display = 'none'; });
     }
+    var statsFilterAno = '', statsFilterMes = '', statsFilterDia = '';
+    function populateStatsAnoOptions(exportados) {
+      var sel = document.getElementById('stats-filter-ano');
+      if (!sel) return;
+      var anos = [];
+      exportados.forEach(function(o) { var y = new Date(o.ts).getFullYear(); if (anos.indexOf(y) === -1) anos.push(y); });
+      anos.sort(function(a, b) { return b - a; });
+      var current = sel.value;
+      sel.innerHTML = '<option value="">Todos</option>' + anos.map(function(y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+      sel.value = anos.indexOf(parseInt(current, 10)) !== -1 ? current : '';
+    }
+    function applyStatsDateFilter() {
+      statsFilterAno = document.getElementById('stats-filter-ano').value;
+      statsFilterMes = document.getElementById('stats-filter-mes').value;
+      statsFilterDia = document.getElementById('stats-filter-dia').value;
+      if (statsFilterDia) { document.getElementById('stats-filter-ano').value = ''; document.getElementById('stats-filter-mes').value = ''; statsFilterAno = ''; statsFilterMes = ''; }
+      updateStats();
+    }
+    function clearStatsDateFilter() {
+      statsFilterAno = ''; statsFilterMes = ''; statsFilterDia = '';
+      document.getElementById('stats-filter-ano').value = '';
+      document.getElementById('stats-filter-mes').value = '';
+      document.getElementById('stats-filter-dia').value = '';
+      updateStats();
+    }
     function updateStats() {
       var empty = document.getElementById('s-empty'), cont = document.getElementById('s-content');
       setLoading(true);
@@ -1554,8 +1617,21 @@ create policy "acesso_publico_banca_historico" on banca_historico
         updateStatsUndoButtons();
         updateBancaCard();
         var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
+        populateStatsAnoOptions(exportados);
         var filtered = exportados;
-        if (!filtered.length) { empty.style.display = 'block'; cont.style.display = 'none'; return; }
+        if (statsFilterDia) {
+          filtered = filtered.filter(function(o) { return new Date(o.ts).toISOString().slice(0, 10) === statsFilterDia; });
+        } else {
+          if (statsFilterAno) filtered = filtered.filter(function(o) { return new Date(o.ts).getFullYear() === parseInt(statsFilterAno, 10); });
+          if (statsFilterMes) filtered = filtered.filter(function(o) { return (new Date(o.ts).getMonth() + 1) === parseInt(statsFilterMes, 10); });
+        }
+        if (!filtered.length) {
+          empty.style.display = 'block'; cont.style.display = 'none';
+          empty.querySelector('p').textContent = (statsFilterAno || statsFilterMes || statsFilterDia)
+            ? 'Nenhuma opera\u00e7\u00e3o exportada encontrada nesse per\u00edodo.'
+            : 'Preencha as Entradas de Gain/Loss em \u{1F4D8}Opera\u00e7\u00f5es e clique em \u201cExportar Trade do Dia\u201d para ver as estat\u00edsticas.';
+          return;
+        }
         empty.style.display = 'none'; cont.style.display = 'block';
         var total = filtered.length, gains = filtered.filter(function(o) { return o.res === 'gain'; }).length;
         var stops = filtered.filter(function(o) { return o.res === 'stop'; }).length;
