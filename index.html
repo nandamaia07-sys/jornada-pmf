@@ -141,6 +141,7 @@
     .stats-action-btn.danger { border-color:var(--bear); color:var(--bear); background:var(--bear-dim); }
     .stats-action-btn.danger:hover { opacity:.85; }
     .stats-banca-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .stats-banca-row-3 { grid-template-columns:1fr 1fr 1fr; }
     .stats-banca-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
     .stats-banca-box span { display:block; font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:#9a9ac2; margin-bottom:6px; }
     .stats-banca-box strong { font-family:var(--mono); font-size:17px; font-weight:900; color:var(--text); }
@@ -589,6 +590,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
           <input type="text" class="f-inp" id="inp-par" placeholder="ex: WINM25  EURUSD  PETR4  MXRF11">
         </div>
         <div class="f-row">
+          <label class="f-lbl" for="inp-data">Data da Opera&#231;&#227;o</label>
+          <input type="date" class="f-inp" id="inp-data" style="text-transform:none">
+        </div>
+        <div class="f-row">
           <label class="f-lbl">Dire&#231;&#227;o da Entrada</label>
           <div class="tog-wrap">
             <button class="tog bull" id="tog-compra" onclick="pickDir('compra')">&#9650; COMPRA</button>
@@ -646,6 +651,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
           <div class="cmp-total-row">
             <span>Resultado acumulado</span>
             <strong id="ops-total-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Saldo Atual (Banca + Resultado)</span>
+            <strong id="ops-saldo-val">R$ 0,00</strong>
           </div>
           <div class="cmp-meta-bar-wrap">
             <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="ops-meta-bar-fill"></div></div>
@@ -730,7 +739,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
 
         <div class="cmp-card" id="s-banca-card" style="display:none">
           <div class="cmp-sec-title">&#128176; Evolu&#231;&#227;o da Banca</div>
-          <div class="stats-banca-row">
+          <div class="stats-banca-row stats-banca-row-3">
             <div class="stats-banca-box">
               <span>&#218;ltima Banca</span>
               <strong id="s-banca-val">R$ 0,00</strong>
@@ -738,6 +747,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
             <div class="stats-banca-box">
               <span>Resultado Acumulado</span>
               <strong id="s-banca-resultado">&#8212;</strong>
+            </div>
+            <div class="stats-banca-box">
+              <span>Saldo Atual</span>
+              <strong id="s-banca-saldo">&#8212;</strong>
             </div>
           </div>
           <div id="s-banca-hist-list" class="stats-banca-hist-list"></div>
@@ -917,6 +930,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
           <div class="cmp-total-row">
             <span>Resultado acumulado</span>
             <strong id="cmp-total-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Saldo Atual (Banca + Resultado)</span>
+            <strong id="cmp-saldo-val">R$ 0,00</strong>
           </div>
           <div class="cmp-meta-bar-wrap">
             <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="cmp-meta-bar-fill"></div></div>
@@ -1315,13 +1332,23 @@ create policy "acesso_publico_banca_historico" on banca_historico
       var valorRaw = parseFloat(document.getElementById('inp-valor').value);
       var nota = document.getElementById('inp-nota').value.trim();
       var imgs = selImgs.slice();
+      var dataInp = document.getElementById('inp-data').value;
+      var tsFinal;
+      if (dataInp) {
+        var now = new Date();
+        var parts = dataInp.split('-');
+        var dt = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10), now.getHours(), now.getMinutes(), now.getSeconds());
+        tsFinal = dt.toISOString();
+      } else {
+        tsFinal = new Date().toISOString();
+      }
       setLoading(true);
       (imgs.length > 0 ? makeThumbnail(imgs[0]) : Promise.resolve(null)).then(function(thumb) {
         return dbAdd({
           par: par, dir: selDir, res: selRes, categoria: selCat, conta: selConta,
           valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota,
           thumb: thumb, imagem: imgs[0] || null, imagens: imgs.length > 0 ? JSON.stringify(imgs) : null,
-          origem: 'print', ts: new Date().toISOString()
+          origem: 'print', ts: tsFinal
         });
       }).then(function() {
         resetForm(); showToast('Operação salva!', 'success'); return renderList();
@@ -1331,6 +1358,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
     function resetForm() {
       document.getElementById('inp-par').value = ''; document.getElementById('inp-nota').value = ''; document.getElementById('inp-valor').value = '';
       document.getElementById('img-file').value = '';
+      var di = document.getElementById('inp-data'); if (di) di.value = new Date().toISOString().slice(0,10);
       selImgs = []; selDir = null; selRes = null; selCur = null; selCat = null; selConta = null;
       renderFormImages();
       ['tog-compra','tog-venda','tog-gain','tog-stop','tog-dt','tog-ac','tog-fii'].forEach(function(id) { document.getElementById(id).classList.remove('on'); });
@@ -1570,6 +1598,13 @@ create policy "acesso_publico_banca_historico" on banca_historico
         var pctTxt = (pct !== null && !isNaN(pct)) ? ' (' + (totalResultado >= 0 ? '+' : '') + pct.toFixed(1) + '%)' : '';
         resEl.textContent = (totalResultado >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(totalResultado)) + pctTxt;
         resEl.className = totalResultado > 0 ? 'pos' : (totalResultado < 0 ? 'neg' : '');
+
+        var saldoAtual = bancaToShow + totalResultado;
+        var saldoEl = document.getElementById('s-banca-saldo');
+        if (saldoEl) {
+          saldoEl.textContent = fmtBRL(saldoAtual);
+          saldoEl.className = saldoAtual > bancaToShow ? 'pos' : (saldoAtual < bancaToShow ? 'neg' : '');
+        }
 
         var histWrap = document.getElementById('s-banca-hist-list');
         histWrap.innerHTML = histRows.slice(0, 15).map(function(row) {
@@ -2320,6 +2355,14 @@ create policy "acesso_publico_banca_historico" on banca_historico
         totalEl.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
       });
 
+      var saldoAtual = banca + total;
+      ['cmp','ops'].forEach(function(p) {
+        var saldoEl = document.getElementById(p + '-saldo-val');
+        if (!saldoEl) return;
+        saldoEl.textContent = fmtBRL(saldoAtual);
+        saldoEl.className = saldoAtual > banca ? 'pos' : (saldoAtual < banca ? 'neg' : '');
+      });
+
       ['cmp','ops'].forEach(function(p) {
         var fill = document.getElementById(p + '-meta-bar-fill');
         var label = document.getElementById(p + '-meta-bar-label');
@@ -2593,30 +2636,4 @@ create policy "acesso_publico_banca_historico" on banca_historico
       ctx.strokeStyle = '#00e676'; ctx.lineWidth = s*.075; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.beginPath(); ctx.moveTo(s*.12,s*.70); ctx.lineTo(s*.30,s*.46); ctx.lineTo(s*.50,s*.58); ctx.lineTo(s*.72,s*.26); ctx.lineTo(s*.88,s*.40); ctx.stroke();
       ctx.fillStyle = '#00e676'; ctx.beginPath(); ctx.arc(s*.88,s*.40,s*.055,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#4d7fff'; ctx.font = '900 '+Math.round(s*.19)+'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('PMF',s/2,s*.97);
-      return c.toDataURL('image/png');
-    }
-    function setupPWA() {
-      var icon = generateIcon(512); document.getElementById('apple-icon').href = icon;
-      var manifest = { name:'Jornada PMF', short_name:'Jornada PMF', description:'Diário de operações de day trade', start_url:'./', scope:'./', display:'standalone', background_color:'#0b0b12', theme_color:'#0b0b12', orientation:'portrait-primary', icons:[{src:generateIcon(192),sizes:'192x192',type:'image/png'},{src:icon,sizes:'512x512',type:'image/png',purpose:'any maskable'}] };
-      var blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
-    }
-    window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').classList.add('show'); });
-    window.addEventListener('appinstalled', function() { document.getElementById('install-banner').classList.remove('show'); deferredPrompt = null; });
-    function installApp() { if (!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(function() { deferredPrompt = null; document.getElementById('install-banner').classList.remove('show'); }); }
-    function dismissBanner() { document.getElementById('install-banner').classList.remove('show'); }
-
-    /* INIT */
-    try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
-    try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
-    try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
-    if (!SUPA_URL || !SUPA_KEY) {
-      document.getElementById('cfg-overlay').classList.add('show');
-    } else {
-      renderList();
-      refreshMetaPanel();
-    }
-  </script>
-</body>
-</html>
+      ctx.fillStyle = '#4d7fff'; ctx.font = '900 '+Math.round(s*.19)+'px system
