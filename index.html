@@ -134,6 +134,16 @@
     .stats-action-btn:disabled { opacity:.3; cursor:not-allowed; }
     .stats-action-btn.danger { border-color:var(--bear); color:var(--bear); background:var(--bear-dim); }
     .stats-action-btn.danger:hover { opacity:.85; }
+    .stats-banca-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .stats-banca-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
+    .stats-banca-box span { display:block; font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:#9a9ac2; margin-bottom:6px; }
+    .stats-banca-box strong { font-family:var(--mono); font-size:17px; font-weight:900; color:var(--text); }
+    .stats-banca-box strong.pos { color:var(--bull); } .stats-banca-box strong.neg { color:var(--bear); }
+    .stats-banca-hist-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
+    .stats-banca-hist-row { display:flex; justify-content:space-between; align-items:center; background:var(--surface2); border-radius:8px; padding:9px 12px; font-size:12px; }
+    .stats-banca-hist-date { color:var(--muted); font-weight:600; }
+    .stats-banca-hist-vals { display:flex; gap:10px; align-items:center; font-family:var(--mono); font-weight:700; }
+    .stats-banca-hist-vals .pos { color:var(--bull); } .stats-banca-hist-vals .neg { color:var(--bear); }
     .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
     .scard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
     .scard.full { grid-column:1/-1; }
@@ -360,6 +370,13 @@
     .timeline-textarea::placeholder { color:var(--muted); }
     .timeline-del-btn { width:36px; height:36px; flex-shrink:0; border-radius:8px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .timeline-del-btn:hover { opacity:.85; }
+    /* LIGHTBOX DE IMAGEM EM TELA CHEIA */
+    .img-lightbox-overlay { position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.94); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
+    .img-lightbox-overlay.show { display:flex; }
+    .img-lightbox-overlay img { max-width:96vw; max-height:96vh; object-fit:contain; cursor:default; box-shadow:0 8px 40px rgba(0,0,0,.6); border-radius:4px; }
+    .img-lightbox-close { position:fixed; top:16px; right:16px; width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25); color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+    .img-lightbox-close:hover { background:rgba(255,255,255,.2); }
+    .carousel-img, .modal-img-box img { cursor:zoom-in; }
 
     /* DESKTOP */
     @media (min-width: 900px) {
@@ -494,6 +511,17 @@ create table memorias_evolucao (
 );
 alter table memorias_evolucao enable row level security;
 create policy "acesso_publico_memorias" on memorias_evolucao
+  for all using (true) with check (true);
+
+create table banca_historico (
+  id bigserial primary key,
+  banca numeric,
+  resultado numeric,
+  percentual numeric,
+  ts timestamptz default now()
+);
+alter table banca_historico enable row level security;
+create policy "acesso_publico_banca_historico" on banca_historico
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -669,6 +697,22 @@ create policy "acesso_publico_memorias" on memorias_evolucao
           <button class="stats-action-btn" id="stats-redo-btn" onclick="redoStats()" disabled>&#8631; Refazer</button>
           <button class="stats-action-btn danger" onclick="resetStatsAll()">&#128465;&#65039; Reiniciar</button>
         </div>
+
+        <div class="cmp-card" id="s-banca-card" style="display:none">
+          <div class="cmp-sec-title">&#128176; Evolu&#231;&#227;o da Banca</div>
+          <div class="stats-banca-row">
+            <div class="stats-banca-box">
+              <span>&#218;ltima Banca</span>
+              <strong id="s-banca-val">R$ 0,00</strong>
+            </div>
+            <div class="stats-banca-box">
+              <span>Resultado do &#218;ltimo Dia</span>
+              <strong id="s-banca-resultado">&#8212;</strong>
+            </div>
+          </div>
+          <div id="s-banca-hist-list" class="stats-banca-hist-list"></div>
+        </div>
+
         <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
         <div id="s-content">
           <div class="stats-grid">
@@ -992,6 +1036,12 @@ create policy "acesso_publico_memorias" on memorias_evolucao
     </div>
   </div>
 
+  <!-- Lightbox de imagem em tela cheia -->
+  <div class="img-lightbox-overlay" id="img-lightbox-overlay" onclick="closeImgLightbox()">
+    <button class="img-lightbox-close" onclick="closeImgLightbox()">&#10005;</button>
+    <img id="img-lightbox-img" src="" alt="print ampliado" onclick="event.stopPropagation()">
+  </div>
+
   <script>
     /* CONFIG */
     var SUPA_URL = localStorage.getItem('jpf_url') || '';
@@ -1135,7 +1185,7 @@ create policy "acesso_publico_memorias" on memorias_evolucao
         return '<button class="carousel-dot' + (i === idx ? ' active' : '') + '" onclick="jumpCarousel(' + i + ')"></button>';
       }).join('') + '</div>' : '';
       var counter = carouselImgs.length > 1 ? '<div class="carousel-counter">' + (idx+1) + '/' + carouselImgs.length + '</div>' : '';
-      box.innerHTML = '<div class="carousel-wrap"><div class="carousel-img-container"><img class="carousel-img" src="' + carouselImgs[idx] + '" alt="print"></div>' + arrows + dots + counter + '</div>';
+      box.innerHTML = '<div class="carousel-wrap"><div class="carousel-img-container"><img class="carousel-img" src="' + carouselImgs[idx] + '" alt="print" onclick="openImgLightbox(this.src)"></div>' + arrows + dots + counter + '</div>';
       setupCarouselSwipe(box, false);
     }
     function nextImg() { if (!carouselImgs.length) return; carouselIdx = (carouselIdx+1) % carouselImgs.length; renderCarousel(); }
@@ -1155,7 +1205,7 @@ create policy "acesso_publico_memorias" on memorias_evolucao
           return '<button class="carousel-dot' + (i === idx ? ' active' : '') + '" onclick="jumpEditCarousel(' + i + ')"></button>';
         }).join('') + '</div>' : '';
         var counter = imgs.length > 1 ? '<div class="carousel-counter">' + (idx+1) + '/' + imgs.length + '</div>' : '';
-        box.innerHTML = '<div class="carousel-wrap"><div class="carousel-img-container"><img class="carousel-img" src="' + imgs[idx] + '" alt="print"></div>' + arrows + dots + counter + '</div>';
+        box.innerHTML = '<div class="carousel-wrap"><div class="carousel-img-container"><img class="carousel-img" src="' + imgs[idx] + '" alt="print" onclick="openImgLightbox(this.src)"></div>' + arrows + dots + counter + '</div>';
         setupCarouselSwipe(box, true);
       }
       var ea = document.getElementById('edit-img-actions');
@@ -1353,6 +1403,15 @@ create policy "acesso_publico_memorias" on memorias_evolucao
       hideGenConfirm();
       if (cb) cb();
     });
+    function openImgLightbox(src) {
+      if (!src) return;
+      document.getElementById('img-lightbox-img').src = src;
+      document.getElementById('img-lightbox-overlay').classList.add('show');
+    }
+    function closeImgLightbox() {
+      document.getElementById('img-lightbox-overlay').classList.remove('show');
+      document.getElementById('img-lightbox-img').src = '';
+    }
     function doDelete() {
       if (!modalId) return; hidDelConfirm(); setLoading(true);
       dbDel2(modalId).then(function() { closeModal(); showToast('Operação excluída.', 'success'); renderList(); updateStats(); })
@@ -1457,12 +1516,43 @@ create policy "acesso_publico_memorias" on memorias_evolucao
           .finally(function() { setLoading(false); });
       });
     }
+    function updateBancaCard() {
+      var card = document.getElementById('s-banca-card');
+      if (!card) return;
+      dbBancaHistList().then(function(rows) {
+        rows = rows || [];
+        if (!rows.length) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
+        var ultima = rows[0];
+        document.getElementById('s-banca-val').textContent = fmtBRL(parseFloat(ultima.banca) || 0);
+        var resEl = document.getElementById('s-banca-resultado');
+        var r = parseFloat(ultima.resultado);
+        if (isNaN(r)) { resEl.textContent = '\u2014'; resEl.className = ''; }
+        else {
+          var pctTxt = (ultima.percentual != null && !isNaN(parseFloat(ultima.percentual))) ? ' (' + (r >= 0 ? '+' : '') + parseFloat(ultima.percentual).toFixed(1) + '%)' : '';
+          resEl.textContent = (r >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(r)) + pctTxt;
+          resEl.className = r > 0 ? 'pos' : (r < 0 ? 'neg' : '');
+        }
+        var histWrap = document.getElementById('s-banca-hist-list');
+        histWrap.innerHTML = rows.slice(0, 15).map(function(row) {
+          var d = new Date(row.ts);
+          var dateTxt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+          var rv = parseFloat(row.resultado);
+          var cls = rv > 0 ? 'pos' : (rv < 0 ? 'neg' : '');
+          var pctTxt2 = (row.percentual != null && !isNaN(parseFloat(row.percentual))) ? ' (' + (rv >= 0 ? '+' : '') + parseFloat(row.percentual).toFixed(1) + '%)' : '';
+          return '<div class="stats-banca-hist-row"><span class="stats-banca-hist-date">' + dateTxt + '</span>' +
+            '<span class="stats-banca-hist-vals"><span>' + fmtBRL(parseFloat(row.banca) || 0) + '</span>' +
+            '<span class="' + cls + '">' + (rv >= 0 ? '+' : '\u2212') + ' ' + fmtBRL(Math.abs(isNaN(rv)?0:rv)) + pctTxt2 + '</span></span></div>';
+        }).join('');
+      }).catch(function() { card.style.display = 'none'; });
+    }
     function updateStats() {
       var empty = document.getElementById('s-empty'), cont = document.getElementById('s-content');
       setLoading(true);
       dbList().then(function(ops) {
         setLoading(false);
         updateStatsUndoButtons();
+        updateBancaCard();
         var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
         var filtered = exportados;
         if (!filtered.length) { empty.style.display = 'block'; cont.style.display = 'none'; return; }
@@ -1579,6 +1669,9 @@ create policy "acesso_publico_memorias" on memorias_evolucao
     function dbMemAdd() { return supaReq('memorias_evolucao', { method: 'POST', body: JSON.stringify({ ano: null, titulo: '', texto: '', imagem: null }) }); }
     function dbMemUpd(id, fields) { return supaReq('memorias_evolucao?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
     function dbMemDel(id) { return supaReq('memorias_evolucao?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
+
+    function dbBancaHistList() { return supaReq('banca_historico?select=id,banca,resultado,percentual,ts&order=ts.desc'); }
+    function dbBancaHistAdd(banca, resultado, percentual) { return supaReq('banca_historico', { method: 'POST', body: JSON.stringify({ banca: banca, resultado: resultado, percentual: percentual }) }); }
 
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
     function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
@@ -2193,23 +2286,34 @@ create policy "acesso_publico_memorias" on memorias_evolucao
     }
     function exportCmpTradeDia() {
       var records = [];
+      var totalGain = 0, totalLoss = 0;
       for (var i = 1; i <= 5; i++) {
         var vg = parseFloat(document.getElementById('cmp-entry-' + i).value);
         if (!isNaN(vg) && vg !== 0) {
           records.push({ par:'TRADE DO DIA', dir:'compra', res:'gain', categoria:'daytrade', conta:'real', valor: Math.abs(vg), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+          totalGain += Math.abs(vg);
         }
         var vl = parseFloat(document.getElementById('cmp-loss-' + i).value);
         if (!isNaN(vl) && vl !== 0) {
           records.push({ par:'TRADE DO DIA', dir:'venda', res:'stop', categoria:'daytrade', conta:'real', valor: Math.abs(vl), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+          totalLoss += Math.abs(vl);
         }
       }
       if (!records.length) { showToast('Preencha ao menos uma entrada de Gain ou Loss.', 'error'); return; }
+      var bancaAtual = parseFloat(document.getElementById('cmp-banca').value);
+      var resultadoDia = totalGain - totalLoss;
+      var percentualDia = (!isNaN(bancaAtual) && bancaAtual > 0) ? (resultadoDia / bancaAtual) * 100 : null;
       setLoading(true);
       captureStatsSnapshot().then(function(before) {
         statsSnapshotBefore = before;
         statsSnapshotAfter = null;
         return Promise.all(records.map(function(r) { return dbAdd(r); }));
       })
+        .then(function() {
+          if (!isNaN(bancaAtual)) {
+            return dbBancaHistAdd(bancaAtual, resultadoDia, percentualDia).catch(function(e) { showToast('Aviso: hist\u00f3rico de banca n\u00e3o foi salvo (' + e.message + ')', 'error'); });
+          }
+        })
         .then(function() {
           showToast('Trade do dia exportado para as estat\u00edsticas!', 'success');
           return dbMetaSet({ gains: [], losses: [] });
