@@ -407,6 +407,7 @@
       #tab-operacional { overflow-y:auto; height:100%; }
       #tab-memorias { overflow-y:auto; height:100%; }
       #tab-operacional .cmp-wrap { max-width:1400px; }
+      #tab-compromisso .cmp-wrap { max-width:900px; }
       .op-method-layout { flex-direction:row; align-items:stretch; }
       .op-method-img-col { flex:0 0 60%; }
       .op-method-notes-col { flex:1; }
@@ -1950,7 +1951,7 @@ create policy "acesso_publico_aportes" on aportes
       }).join('') + '</div>' : '';
       var counter = imgs.length > 1 ? '<div class="carousel-counter">' + (cur + 1) + '/' + imgs.length + '</div>' : '';
       return '<div class="carousel-wrap" style="width:100%;height:100%;position:absolute;inset:0">' +
-        '<div class="carousel-img-container" style="height:100%"><img src="' + imgs[cur] + '" alt="m\u00e9todo operacional"></div>' +
+        '<div class="carousel-img-container" style="height:100%"><img class="carousel-img" src="' + imgs[cur] + '" alt="m\u00e9todo operacional" onclick="event.stopPropagation();openImgLightbox(this.src)"></div>' +
         arrows + dots + counter +
         '<button class="op-method-img-del" onclick="event.stopPropagation();clearOpmImage(' + id + ')" title="Remover esta imagem">&#10005;</button>' +
         '<span class="op-method-img-badge">Toque para adicionar mais</span>' +
