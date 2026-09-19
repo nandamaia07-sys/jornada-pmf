@@ -1383,7 +1383,6 @@ create policy "acesso_publico_aportes" on aportes
     /* SAVE */
     function saveOp() {
       var par = document.getElementById('inp-par').value.trim().toUpperCase();
-      if (!par)     { showToast('Informe o par / ativo.', 'error'); return; }
       if (!selConta){ showToast('Selecione a conta (Real ou Simulação).', 'error'); return; }
       if (!selCat)  { showToast('Selecione a categoria.', 'error'); return; }
       if (!selDir)  { showToast('Selecione a direção.', 'error'); return; }
@@ -1404,7 +1403,7 @@ create policy "acesso_publico_aportes" on aportes
       setLoading(true);
       (imgs.length > 0 ? makeThumbnail(imgs[0]) : Promise.resolve(null)).then(function(thumb) {
         return dbAdd({
-          par: par, dir: selDir, res: selRes, categoria: selCat, conta: selConta,
+          par: par || null, dir: selDir, res: selRes, categoria: selCat, conta: selConta,
           valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota,
           thumb: thumb, imagem: imgs[0] || null, imagens: imgs.length > 0 ? JSON.stringify(imgs) : null,
           origem: 'print', ts: tsFinal
@@ -1458,7 +1457,7 @@ create policy "acesso_publico_aportes" on aportes
           var nSnip = op.nota ? '<div class="card-note">' + escHtml(op.nota) + '</div>' : '';
           return '<div class="card" onclick="openModal(' + op.id + ')">' +
             '<div class="card-edge ' + edge + '"></div>' + thumb +
-            '<div class="card-body"><div class="card-pair">' + escHtml(op.par) + '</div>' +
+            '<div class="card-body"><div class="card-pair">' + escHtml(op.par || 'SEM PAR/ATIVO') + '</div>' +
             '<div class="card-badges">' + contaB + catB + dirB + resB + '</div>' +
             '<div class="card-date">' + date + '</div>' + vSnip + nSnip + '</div></div>';
         }).join('');
@@ -1472,7 +1471,7 @@ create policy "acesso_publico_aportes" on aportes
         setLoading(false);
         var op = rows[0]; if (!op) return;
         modalId = id; editMode = false; editImgs = null;
-        document.getElementById('m-par').textContent = op.par;
+        document.getElementById('m-par').textContent = op.par || 'Sem Par/Ativo';
         var imgs = [];
         if (op.imagens) { try { imgs = JSON.parse(op.imagens); } catch(e) {} }
         if (!imgs.length && op.imagem) imgs = [op.imagem];
