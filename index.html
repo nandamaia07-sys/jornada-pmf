@@ -466,6 +466,7 @@ create policy "acesso_publico_config" on compromisso_config
 
 create table meta_limite_dia (
   id int primary key default 1,
+  data date,
   banca numeric,
   stop_pct numeric,
   gain_pct numeric,
@@ -627,6 +628,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="ops-data" style="text-transform:none" oninput="calcCmpMeta('ops')">
+            </div>
             <div class="cmp-meta-field">
               <label class="f-lbl">Banca do Dia</label>
               <input type="number" class="f-inp-valor cmp-meta-inp" id="ops-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('ops')">
@@ -903,6 +908,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="cmp-data" style="text-transform:none" oninput="calcCmpMeta('cmp')">
+            </div>
             <div class="cmp-meta-field">
               <label class="f-lbl">Banca do Dia</label>
               <input type="number" class="f-inp-valor cmp-meta-inp" id="cmp-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('cmp')">
@@ -1782,7 +1791,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
     function dbMemDel(id) { return supaReq('memorias_evolucao?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
     function dbBancaHistList() { return supaReq('banca_historico?select=id,banca,resultado,percentual,ts&order=ts.desc'); }
-    function dbBancaHistAdd(banca, resultado, percentual) { return supaReq('banca_historico', { method: 'POST', body: JSON.stringify({ banca: banca, resultado: resultado, percentual: percentual }) }); }
+    function dbBancaHistAdd(banca, resultado, percentual, ts) { return supaReq('banca_historico', { method: 'POST', body: JSON.stringify({ banca: banca, resultado: resultado, percentual: percentual, ts: ts || new Date().toISOString() }) }); }
 
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
     function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
@@ -2285,6 +2294,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
         var gains = row.gains || [];
         var losses = row.losses || [];
         ['cmp','ops'].forEach(function(px) {
+          var dt = document.getElementById(px + '-data'); if (dt) dt.value = row.data || new Date().toISOString().slice(0,10);
           var b = document.getElementById(px + '-banca'); if (b) b.value = (row.banca != null ? row.banca : '');
           var s = document.getElementById(px + '-stop-pct'); if (s) s.value = (row.stop_pct != null ? row.stop_pct : '');
           var g = document.getElementById(px + '-gain-pct'); if (g) g.value = (row.gain_pct != null ? row.gain_pct : '');
@@ -2296,6 +2306,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
       }).catch(function(e) { showToast('Erro ao carregar meta do dia: ' + e.message, 'error'); });
     }
     var saveMetaDebounced = debounce(function() {
+      var dataVal = document.getElementById('cmp-data').value;
       var banca = parseFloat(document.getElementById('cmp-banca').value);
       var stopPct = parseFloat(document.getElementById('cmp-stop-pct').value);
       var gainPct = parseFloat(document.getElementById('cmp-gain-pct').value);
@@ -2307,6 +2318,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
         losses.push(vl === '' ? null : parseFloat(vl));
       }
       dbMetaSet({
+        data: dataVal || null,
         banca: isNaN(banca) ? null : banca,
         stop_pct: isNaN(stopPct) ? null : stopPct,
         gain_pct: isNaN(gainPct) ? null : gainPct,
@@ -2324,6 +2336,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
       var ob = document.getElementById(otherPx + '-banca'); if (ob) ob.value = document.getElementById(px + '-banca').value;
       var os = document.getElementById(otherPx + '-stop-pct'); if (os) os.value = document.getElementById(px + '-stop-pct').value;
       var og = document.getElementById(otherPx + '-gain-pct'); if (og) og.value = document.getElementById(px + '-gain-pct').value;
+      var od = document.getElementById(otherPx + '-data'); if (od) od.value = document.getElementById(px + '-data').value;
 
       var stopVal = banca * (stopPct / 100);
       var gainVal = banca * (gainPct / 100);
@@ -2396,7 +2409,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
     function resetCmpMeta() {
       showGenConfirm('Reiniciar o dia?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
         setLoading(true);
-        dbMetaSet({ banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] })
+        dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] })
           .then(function() { return loadCmpMetaFromCloud(); })
           .then(function() { calcCmpMeta('cmp'); showToast('Dia reiniciado!', 'success'); })
           .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
@@ -2406,15 +2419,25 @@ create policy "acesso_publico_banca_historico" on banca_historico
     function exportCmpTradeDia() {
       var records = [];
       var totalGain = 0, totalLoss = 0;
+      var dataInp = document.getElementById('cmp-data').value;
+      var tsFinal;
+      if (dataInp) {
+        var now = new Date();
+        var parts = dataInp.split('-');
+        var dt = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10), now.getHours(), now.getMinutes(), now.getSeconds());
+        tsFinal = dt.toISOString();
+      } else {
+        tsFinal = new Date().toISOString();
+      }
       for (var i = 1; i <= 5; i++) {
         var vg = parseFloat(document.getElementById('cmp-entry-' + i).value);
         if (!isNaN(vg) && vg !== 0) {
-          records.push({ par:'TRADE DO DIA', dir:'compra', res:'gain', categoria:'daytrade', conta:'real', valor: Math.abs(vg), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+          records.push({ par:'TRADE DO DIA', dir:'compra', res:'gain', categoria:'daytrade', conta:'real', valor: Math.abs(vg), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:tsFinal });
           totalGain += Math.abs(vg);
         }
         var vl = parseFloat(document.getElementById('cmp-loss-' + i).value);
         if (!isNaN(vl) && vl !== 0) {
-          records.push({ par:'TRADE DO DIA', dir:'venda', res:'stop', categoria:'daytrade', conta:'real', valor: Math.abs(vl), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:new Date().toISOString() });
+          records.push({ par:'TRADE DO DIA', dir:'venda', res:'stop', categoria:'daytrade', conta:'real', valor: Math.abs(vl), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:tsFinal });
           totalLoss += Math.abs(vl);
         }
       }
@@ -2430,7 +2453,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
       })
         .then(function() {
           if (!isNaN(bancaAtual)) {
-            return dbBancaHistAdd(bancaAtual, resultadoDia, percentualDia).catch(function(e) { showToast('Aviso: hist\u00f3rico de banca n\u00e3o foi salvo (' + e.message + ')', 'error'); });
+            return dbBancaHistAdd(bancaAtual, resultadoDia, percentualDia, tsFinal).catch(function(e) { showToast('Aviso: hist\u00f3rico de banca n\u00e3o foi salvo (' + e.message + ')', 'error'); });
           }
         })
         .then(function() {
