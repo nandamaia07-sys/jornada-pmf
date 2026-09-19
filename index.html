@@ -151,6 +151,16 @@
     .stats-banca-hist-date { color:var(--muted); font-weight:600; }
     .stats-banca-hist-vals { display:flex; gap:10px; align-items:center; font-family:var(--mono); font-weight:700; }
     .stats-banca-hist-vals .pos { color:var(--bull); } .stats-banca-hist-vals .neg { color:var(--bear); }
+    .aporte-group { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
+    .aporte-group-title { font-size:13px; font-weight:800; color:var(--blue); margin-bottom:10px; text-transform:uppercase; letter-spacing:.3px; }
+    .aporte-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); font-size:12px; }
+    .aporte-row:last-child { border-bottom:none; }
+    .aporte-row-date { color:var(--muted); font-weight:600; }
+    .aporte-row-val { font-family:var(--mono); font-weight:700; color:var(--bull); margin-left:auto; margin-right:10px; }
+    .aporte-row-del { background:none; border:none; color:var(--bear); cursor:pointer; font-size:14px; padding:2px 4px; flex-shrink:0; }
+    .aporte-row-del:hover { opacity:.7; }
+    .aporte-group-total { display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:.3px; color:var(--muted); }
+    .aporte-group-total strong { color:var(--bull); font-family:var(--mono); font-size:14px; text-transform:none; letter-spacing:0; }
     .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
     .scard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
     .scard.full { grid-column:1/-1; }
@@ -530,6 +540,17 @@ create table banca_historico (
 );
 alter table banca_historico enable row level security;
 create policy "acesso_publico_banca_historico" on banca_historico
+  for all using (true) with check (true);
+
+create table aportes (
+  id bigserial primary key,
+  categoria text,
+  data date,
+  valor numeric,
+  criado_em timestamptz default now()
+);
+alter table aportes enable row level security;
+create policy "acesso_publico_aportes" on aportes
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -759,6 +780,35 @@ create policy "acesso_publico_banca_historico" on banca_historico
             </div>
           </div>
           <div id="s-banca-hist-list" class="stats-banca-hist-list"></div>
+        </div>
+
+        <div class="cmp-card" id="s-aportes-card">
+          <div class="cmp-sec-title">&#128181; Aportes de Capital</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Categoria</label>
+              <select class="f-inp-valor cmp-meta-inp" id="aporte-categoria" style="text-transform:none">
+                <option value="winm">WINM</option>
+                <option value="forex">Forex</option>
+                <option value="acoes">A&#231;&#245;es</option>
+                <option value="fiis">FIIs</option>
+              </select>
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="aporte-data" style="text-transform:none">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Valor</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="aporte-valor" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+          <button class="cmp-add-meta-btn" onclick="addAporte()">&#43; Adicionar Aporte</button>
+          <div id="aportes-groups-list" style="margin-top:14px"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total Geral de Aportes</span>
+            <strong id="aportes-total-geral">R$ 0,00</strong>
+          </div>
         </div>
 
         <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
@@ -1628,6 +1678,76 @@ create policy "acesso_publico_banca_historico" on banca_historico
         }).join('');
       }).catch(function() { card.style.display = 'none'; });
     }
+
+    /* APORTES DE CAPITAL (nuvem: aportes) */
+    var aportesCache = [];
+    var APORTE_CAT_LABELS = { winm: '&#128200; WINM', forex: '&#128176; Forex', acoes: '&#128202; A\u00e7\u00f5es', fiis: '&#127963; FIIs' };
+    var APORTE_CAT_ORDER = ['winm', 'forex', 'acoes', 'fiis'];
+    function loadAportes() {
+      return dbAportesList().then(function(rows) { aportesCache = rows || []; renderAportes(); })
+        .catch(function(e) { showToast('Erro ao carregar aportes: ' + e.message, 'error'); });
+    }
+    function renderAportes() {
+      var wrap = document.getElementById('aportes-groups-list');
+      var totalEl = document.getElementById('aportes-total-geral');
+      if (!wrap || !totalEl) return;
+      if (!aportesCache.length) {
+        wrap.innerHTML = '<p class="cmp-hint" style="text-align:left;margin-bottom:0">Nenhum aporte registrado ainda.</p>';
+        totalEl.textContent = fmtBRL(0);
+        return;
+      }
+      var groups = {};
+      aportesCache.forEach(function(a) {
+        var cat = a.categoria || 'outros';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(a);
+      });
+      var orderedCats = APORTE_CAT_ORDER.filter(function(c) { return groups[c]; })
+        .concat(Object.keys(groups).filter(function(c) { return APORTE_CAT_ORDER.indexOf(c) === -1; }));
+      var totalGeral = 0;
+      wrap.innerHTML = orderedCats.map(function(cat) {
+        var items = groups[cat].slice().sort(function(a, b) { return new Date(a.data) - new Date(b.data); });
+        var subtotal = items.reduce(function(s, a) { return s + (parseFloat(a.valor) || 0); }, 0);
+        totalGeral += subtotal;
+        var rows = items.map(function(a) {
+          var d = a.data ? new Date(a.data + 'T00:00:00').toLocaleDateString('pt-BR') : '\u2014';
+          return '<div class="aporte-row"><span class="aporte-row-date">' + d + '</span>' +
+            '<span class="aporte-row-val">' + fmtBRL(parseFloat(a.valor) || 0) + '</span>' +
+            '<button class="aporte-row-del" onclick="delAporte(' + a.id + ')" title="Excluir">&#10005;</button></div>';
+        }).join('');
+        return '<div class="aporte-group"><div class="aporte-group-title">' + (APORTE_CAT_LABELS[cat] || cat.toUpperCase()) + '</div>' +
+          '<div class="aporte-group-rows">' + rows + '</div>' +
+          '<div class="aporte-group-total"><span>Subtotal</span><strong>' + fmtBRL(subtotal) + '</strong></div></div>';
+      }).join('');
+      totalEl.textContent = fmtBRL(totalGeral);
+    }
+    function addAporte() {
+      var categoria = document.getElementById('aporte-categoria').value;
+      var data = document.getElementById('aporte-data').value;
+      var valor = parseFloat(document.getElementById('aporte-valor').value);
+      if (!data) { showToast('Informe a data do aporte.', 'error'); return; }
+      if (isNaN(valor) || valor <= 0) { showToast('Informe um valor v\u00e1lido.', 'error'); return; }
+      setLoading(true);
+      dbAportesAdd(categoria, data, valor).then(function(rows) {
+        var row = rows && rows[0];
+        if (row) aportesCache.push(row);
+        renderAportes();
+        document.getElementById('aporte-valor').value = '';
+        showToast('Aporte adicionado!', 'success');
+      }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function delAporte(id) {
+      showGenConfirm('Excluir este aporte?', 'Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+        setLoading(true);
+        dbAportesDel(id).then(function() {
+          aportesCache = aportesCache.filter(function(a) { return a.id !== id; });
+          renderAportes();
+          showToast('Removido.', 'success');
+        }).catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
+          .finally(function() { setLoading(false); });
+      });
+    }
     var statsFilterAno = '', statsFilterMes = '', statsFilterDia = '';
     function populateStatsAnoOptions(exportados) {
       var sel = document.getElementById('stats-filter-ano');
@@ -1660,6 +1780,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
         setLoading(false);
         updateStatsUndoButtons();
         updateBancaCard();
+        loadAportes();
         var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
         populateStatsAnoOptions(exportados);
         var filtered = exportados;
@@ -1792,6 +1913,10 @@ create policy "acesso_publico_banca_historico" on banca_historico
 
     function dbBancaHistList() { return supaReq('banca_historico?select=id,banca,resultado,percentual,ts&order=ts.desc'); }
     function dbBancaHistAdd(banca, resultado, percentual, ts) { return supaReq('banca_historico', { method: 'POST', body: JSON.stringify({ banca: banca, resultado: resultado, percentual: percentual, ts: ts || new Date().toISOString() }) }); }
+
+    function dbAportesList() { return supaReq('aportes?select=id,categoria,data,valor&order=data.asc'); }
+    function dbAportesAdd(categoria, data, valor) { return supaReq('aportes', { method: 'POST', body: JSON.stringify({ categoria: categoria, data: data, valor: valor }) }); }
+    function dbAportesDel(id) { return supaReq('aportes?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
     function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
@@ -2678,6 +2803,7 @@ create policy "acesso_publico_banca_historico" on banca_historico
     try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
     try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
     try { var diInit = document.getElementById('inp-data'); if (diInit) diInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
+    try { var apInit = document.getElementById('aporte-data'); if (apInit) apInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
     if (!SUPA_URL || !SUPA_KEY) {
       document.getElementById('cfg-overlay').classList.add('show');
     } else {
