@@ -565,10 +565,10 @@ create policy "acesso_publico_aportes" on aportes
     <span class="hdr-logo">&#128200;</span>
     <h1>Jornada <em>PMF</em></h1>
     <nav class="hdr-nav">
-      <button class="hdr-tab active" data-tab="ops" onclick="switchTab('ops')">&#128203; Opera&#231;&#245;es</button>
-      <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Estat&#237;sticas</button>
+      <button class="hdr-tab active" data-tab="ops" onclick="switchTab('ops')">&#128203; Di&#225;rio de Opera&#231;&#245;es</button>
+      <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Gerenciamento de Risco</button>
       <button class="hdr-tab" data-tab="compromisso" onclick="switchTab('compromisso')">&#128591; Compromisso</button>
-      <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Operacional</button>
+      <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Meu Operacional</button>
       <button class="hdr-tab" data-tab="memorias" onclick="switchTab('memorias')">&#128220; Mem&#243;rias</button>
     </nav>
     <button class="hdr-settings" onclick="openConfig()">&#9881;</button>
@@ -644,8 +644,29 @@ create policy "acesso_publico_aportes" on aportes
           <textarea class="f-area" id="inp-nota" rows="3" placeholder="O que voc&#234; observou nessa opera&#231;&#227;o?"></textarea>
         </div>
         <button class="btn-save" onclick="saveOp()" style="margin-bottom:18px">&#128190; SALVAR</button>
+      </div>
+      <div class="list-wrap">
+        <div class="filter-wrap">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Todos</button>
+          <button class="filter-btn" data-filter="daytrade" onclick="setFilter('daytrade',this)">&#128178; Day Trade</button>
+          <button class="filter-btn" data-filter="acoes" onclick="setFilter('acoes',this)">&#128200; A&#231;&#245;es</button>
+          <button class="filter-btn" data-filter="fiis" onclick="setFilter('fiis',this)">&#127963; FIIs</button>
+        </div>
+        <div class="filter-wrap">
+          <button class="filter-btn active" data-filterconta="all" onclick="setFilterConta('all',this)">Todas as Contas</button>
+          <button class="filter-btn" data-filterconta="real" onclick="setFilterConta('real',this)">&#128994; Real</button>
+          <button class="filter-btn" data-filterconta="simulacao" onclick="setFilterConta('simulacao',this)">&#128309; Simula&#231;&#227;o</button>
+        </div>
+        <div class="list-head" id="list-head">Hist&#243;rico</div>
+        <div id="op-list"></div>
+      </div>
+    </div>
 
-        <div class="cmp-card" style="margin-top:4px">
+    <!-- ESTATISTICAS -->
+    <div class="tab" id="tab-stats">
+      <div class="stats-wrap">
+
+        <div class="cmp-card" style="margin-top:0">
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
@@ -709,27 +730,7 @@ create policy "acesso_publico_aportes" on aportes
             <strong id="ops-ganhos-total">R$ 0,00</strong>
           </div>
         </div>
-      </div>
-      <div class="list-wrap">
-        <div class="filter-wrap">
-          <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Todos</button>
-          <button class="filter-btn" data-filter="daytrade" onclick="setFilter('daytrade',this)">&#128178; Day Trade</button>
-          <button class="filter-btn" data-filter="acoes" onclick="setFilter('acoes',this)">&#128200; A&#231;&#245;es</button>
-          <button class="filter-btn" data-filter="fiis" onclick="setFilter('fiis',this)">&#127963; FIIs</button>
-        </div>
-        <div class="filter-wrap">
-          <button class="filter-btn active" data-filterconta="all" onclick="setFilterConta('all',this)">Todas as Contas</button>
-          <button class="filter-btn" data-filterconta="real" onclick="setFilterConta('real',this)">&#128994; Real</button>
-          <button class="filter-btn" data-filterconta="simulacao" onclick="setFilterConta('simulacao',this)">&#128309; Simula&#231;&#227;o</button>
-        </div>
-        <div class="list-head" id="list-head">Hist&#243;rico</div>
-        <div id="op-list"></div>
-      </div>
-    </div>
 
-    <!-- ESTATISTICAS -->
-    <div class="tab" id="tab-stats">
-      <div class="stats-wrap">
         <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
 
         <div class="stats-date-filter-row">
@@ -1077,8 +1078,8 @@ create policy "acesso_publico_aportes" on aportes
   </div>
 
   <nav class="bnav">
-    <button class="bnav-btn active" data-tab="ops" onclick="switchTab('ops')"><span class="ico">&#128203;</span>Opera&#231;&#245;es</button>
-    <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Estat&#237;sticas</button>
+    <button class="bnav-btn active" data-tab="ops" onclick="switchTab('ops')"><span class="ico">&#128203;</span>Di&#225;rio</button>
+    <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Risco</button>
     <button class="bnav-btn" data-tab="compromisso" onclick="switchTab('compromisso')"><span class="ico">&#128591;</span>Compromisso</button>
     <button class="bnav-btn" data-tab="operacional" onclick="switchTab('operacional')"><span class="ico">&#129517;</span>Operacional</button>
     <button class="bnav-btn" data-tab="memorias" onclick="switchTab('memorias')"><span class="ico">&#128220;</span>Mem&#243;rias</button>
@@ -1773,6 +1774,7 @@ create policy "acesso_publico_aportes" on aportes
     }
     function updateStats() {
       var empty = document.getElementById('s-empty'), cont = document.getElementById('s-content');
+      refreshMetaPanel();
       setLoading(true);
       dbList().then(function(ops) {
         setLoading(false);
@@ -1868,7 +1870,6 @@ create policy "acesso_publico_aportes" on aportes
       if (tab === 'compromisso') renderCompromisso();
       if (tab === 'operacional') loadOperacional();
       if (tab === 'memorias') loadMemorias();
-      if (tab === 'ops') refreshMetaPanel();
     }
 
     /* SUPABASE HELPERS - SINCRONIZACAO NA NUVEM */
