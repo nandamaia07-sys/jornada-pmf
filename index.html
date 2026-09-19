@@ -104,7 +104,7 @@
     .filter-btn.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
     .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; display:flex; align-items:stretch; overflow:hidden; cursor:pointer; transition:border-color .15s; }
     .card:hover { border-color:var(--muted); } .card:active { border-color:var(--blue); }
-    .card-edge { width:5px; flex-shrink:0; } .card-edge.bull { background:var(--bull); } .card-edge.bear { background:var(--bear); }
+    .card-edge { width:5px; flex-shrink:0; } .card-edge.bull { background:var(--bull); } .card-edge.bear { background:var(--bear); } .card-edge.neutral { background:var(--blue); }
     .card-thumb { width:70px; height:70px; flex-shrink:0; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--muted); }
     .card-thumb img { width:100%; height:100%; object-fit:cover; }
     .card-body { flex:1; padding:10px 12px; min-width:0; }
@@ -643,7 +643,7 @@ create policy "acesso_publico_aportes" on aportes
           <label class="f-lbl" for="inp-nota">Anota&#231;&#245;es</label>
           <textarea class="f-area" id="inp-nota" rows="3" placeholder="O que voc&#234; observou nessa opera&#231;&#227;o?"></textarea>
         </div>
-        <button class="btn-save" onclick="saveOp()" style="margin-bottom:18px">&#128190; SALVAR</button>
+        <button class="btn-save" onclick="saveDiario()" style="margin-bottom:18px">&#128190; SALVAR</button>
 
         <div class="cmp-card" style="margin-top:4px">
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
@@ -1381,6 +1381,35 @@ create policy "acesso_publico_aportes" on aportes
     }
 
     /* SAVE */
+    function saveDiario() {
+      var par = document.getElementById('inp-par').value.trim().toUpperCase();
+      var nota = document.getElementById('inp-nota').value.trim();
+      var imgs = selImgs.slice();
+      if (!imgs.length && !nota && !par) { showToast('Adicione um print ou escreva uma anota\u00e7\u00e3o.', 'error'); return; }
+      var valorRaw = parseFloat(document.getElementById('inp-valor').value);
+      var dataInp = document.getElementById('inp-data').value;
+      var tsFinal;
+      if (dataInp) {
+        var now = new Date();
+        var parts = dataInp.split('-');
+        var dt = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10), now.getHours(), now.getMinutes(), now.getSeconds());
+        tsFinal = dt.toISOString();
+      } else {
+        tsFinal = new Date().toISOString();
+      }
+      setLoading(true);
+      (imgs.length > 0 ? makeThumbnail(imgs[0]) : Promise.resolve(null)).then(function(thumb) {
+        return dbAdd({
+          par: par || null, dir: selDir || null, res: selRes || null, categoria: selCat || null, conta: selConta || null,
+          valor: isNaN(valorRaw) ? null : valorRaw, moeda: selCur || 'brl', nota: nota,
+          thumb: thumb, imagem: imgs[0] || null, imagens: imgs.length > 0 ? JSON.stringify(imgs) : null,
+          origem: 'print', ts: tsFinal
+        });
+      }).then(function() {
+        resetForm(); showToast('Diário salvo!', 'success'); return renderList();
+      }).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
     function saveOp() {
       var par = document.getElementById('inp-par').value.trim().toUpperCase();
       if (!selConta){ showToast('Selecione a conta (Real ou Simulação).', 'error'); return; }
@@ -1447,14 +1476,14 @@ create policy "acesso_publico_aportes" on aportes
         list.innerHTML = filtered.map(function(op) {
           var d = new Date(op.ts);
           var date = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-          var edge = op.res === 'gain' ? 'bull' : 'bear';
+          var edge = op.res === 'gain' ? 'bull' : (op.res === 'stop' ? 'bear' : 'neutral');
           var thumb = op.thumb ? '<div class="card-thumb"><img src="' + op.thumb + '" alt="print"></div>' : '<div class="card-thumb">&#128202;</div>';
           var contaB = op.conta ? '<span class="bdg ' + (cntCls[op.conta]||'') + '">' + (cntLbl[op.conta]||op.conta) + '</span>' : '';
           var catB = op.categoria ? '<span class="bdg ' + (catCls[op.categoria]||'') + '">' + (catLbl[op.categoria]||op.categoria) + '</span>' : '';
-          var dirB = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : '<span class="bdg venda">&#9660; VENDA</span>';
-          var resB = op.res === 'gain' ? '<span class="bdg bull">&#9989; GAIN</span>' : '<span class="bdg bear">&#10060; STOP</span>';
+          var dirB = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : (op.dir === 'venda' ? '<span class="bdg venda">&#9660; VENDA</span>' : '');
+          var resB = op.res === 'gain' ? '<span class="bdg bull">&#9989; GAIN</span>' : (op.res === 'stop' ? '<span class="bdg bear">&#10060; STOP</span>' : '');
           var vf = fmtValor(op.valor, op.moeda);
-          var vSnip = vf ? '<div class="card-valor ' + edge + '">' + (op.res === 'gain' ? '+' : '−') + ' ' + vf + '</div>' : '';
+          var vSnip = vf ? '<div class="card-valor ' + (edge === 'bear' ? 'bear' : 'bull') + '">' + (op.res === 'gain' ? '+' : '−') + ' ' + vf + '</div>' : '';
           var nSnip = op.nota ? '<div class="card-note">' + escHtml(op.nota) + '</div>' : '';
           return '<div class="card" onclick="openModal(' + op.id + ')">' +
             '<div class="card-edge ' + edge + '"></div>' + thumb +
@@ -1483,8 +1512,8 @@ create policy "acesso_publico_aportes" on aportes
         var catCM = { daytrade:'cat-dt', acoes:'cat-ac', fiis:'cat-fii' };
         var contaH = op.conta ? '<span class="bdg ' + (cntCM[op.conta]||'') + '">' + (cntLM[op.conta]||op.conta) + '</span>' : '';
         var catH = op.categoria ? '<span class="bdg ' + (catCM[op.categoria]||'') + '">' + (catLM[op.categoria]||op.categoria) + '</span>' : '';
-        var dirH = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : '<span class="bdg venda">&#9660; VENDA</span>';
-        var resH = op.res === 'gain' ? '<span class="bdg bull">&#9989; GAIN</span>' : '<span class="bdg bear">&#10060; STOP</span>';
+        var dirH = op.dir === 'compra' ? '<span class="bdg compra">&#9650; COMPRA</span>' : (op.dir === 'venda' ? '<span class="bdg venda">&#9660; VENDA</span>' : '');
+        var resH = op.res === 'gain' ? '<span class="bdg bull">&#9989; GAIN</span>' : (op.res === 'stop' ? '<span class="bdg bear">&#10060; STOP</span>' : '');
         document.getElementById('m-badges').innerHTML = contaH + catH + dirH + resH;
         var vs = document.getElementById('m-valor-sec'), vf = fmtValor(op.valor, op.moeda);
         if (vf) { vs.style.display = 'block'; var isG = op.res === 'gain'; document.getElementById('m-valor').className = 'modal-valor ' + (isG ? 'bull' : 'bear'); document.getElementById('m-valor').textContent = (isG ? '+ ' : '− ') + vf; } else { vs.style.display = 'none'; }
