@@ -1423,6 +1423,7 @@ create policy "acesso_publico_aportes" on aportes
       ['tog-brl','tog-usd'].forEach(function(id) { document.getElementById(id).classList.remove('on-cur'); });
       document.getElementById('tog-real').classList.remove('on-real');
       document.getElementById('tog-sim').classList.remove('on-sim');
+      pickConta('real');
     }
 
     /* RENDER LIST */
@@ -2803,6 +2804,7 @@ create policy "acesso_publico_aportes" on aportes
     try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
     try { var diInit = document.getElementById('inp-data'); if (diInit) diInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
     try { var apInit = document.getElementById('aporte-data'); if (apInit) apInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
+    try { pickConta('real'); } catch(e) {}
     if (!SUPA_URL || !SUPA_KEY) {
       document.getElementById('cfg-overlay').classList.add('show');
     } else {
