@@ -782,35 +782,6 @@ create policy "acesso_publico_aportes" on aportes
           <div id="s-banca-hist-list" class="stats-banca-hist-list"></div>
         </div>
 
-        <div class="cmp-card" id="s-aportes-card">
-          <div class="cmp-sec-title">&#128181; Aportes de Capital</div>
-          <div class="cmp-meta-inputs-row">
-            <div class="cmp-meta-field">
-              <label class="f-lbl">Categoria</label>
-              <select class="f-inp-valor cmp-meta-inp" id="aporte-categoria" style="text-transform:none">
-                <option value="winm">WINM</option>
-                <option value="forex">Forex</option>
-                <option value="acoes">A&#231;&#245;es</option>
-                <option value="fiis">FIIs</option>
-              </select>
-            </div>
-            <div class="cmp-meta-field">
-              <label class="f-lbl">Data</label>
-              <input type="date" class="f-inp-valor cmp-meta-inp" id="aporte-data" style="text-transform:none">
-            </div>
-            <div class="cmp-meta-field">
-              <label class="f-lbl">Valor</label>
-              <input type="number" class="f-inp-valor cmp-meta-inp" id="aporte-valor" placeholder="0.00" step="0.01" min="0">
-            </div>
-          </div>
-          <button class="cmp-add-meta-btn" onclick="addAporte()">&#43; Adicionar Aporte</button>
-          <div id="aportes-groups-list" style="margin-top:14px"></div>
-          <div class="cmp-total-row" style="margin-top:12px">
-            <span>Total Geral de Aportes</span>
-            <strong id="aportes-total-geral">R$ 0,00</strong>
-          </div>
-        </div>
-
         <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
         <div id="s-content">
           <div class="stats-grid">
@@ -838,6 +809,35 @@ create policy "acesso_publico_aportes" on aportes
               <span class="leg-item bear"><span class="leg-dot" style="background:var(--bear)"></span>Stops</span>
             </div>
             <div class="monthly-scroll"><svg id="monthly-svg" viewBox="0 0 300 130" preserveAspectRatio="xMinYMid meet"></svg></div>
+          </div>
+        </div>
+
+        <div class="cmp-card" id="s-aportes-card">
+          <div class="cmp-sec-title">&#128181; Aportes de Capital</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Categoria</label>
+              <select class="f-inp-valor cmp-meta-inp" id="aporte-categoria" style="text-transform:none">
+                <option value="winm">WINM</option>
+                <option value="forex">Forex</option>
+                <option value="acoes">A&#231;&#245;es</option>
+                <option value="fiis">FIIs</option>
+              </select>
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="aporte-data" style="text-transform:none">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Valor</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="aporte-valor" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+          <button class="cmp-add-meta-btn" onclick="addAporte()">&#43; Adicionar Aporte</button>
+          <div id="aportes-groups-list" style="margin-top:14px"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total Geral de Aportes</span>
+            <strong id="aportes-total-geral">R$ 0,00</strong>
           </div>
         </div>
       </div>
