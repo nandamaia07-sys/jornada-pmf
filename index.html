@@ -1061,7 +1061,7 @@ create policy "acesso_publico_aportes" on aportes
         </div>
 
         <div id="opm-entries-list"></div>
-        <button class="cmp-add-meta-btn" onclick="addOpmEntry()">&#43; Adicionar Print com Anota&#231;&#227;o</button>
+        <button class="cmp-add-meta-btn" id="opm-add-btn" onclick="addOpmEntry()">&#43; Adicionar Print com Anota&#231;&#227;o</button>
       </div>
     </div>
 
@@ -1977,14 +1977,23 @@ create policy "acesso_publico_aportes" on aportes
       '</div>';
     }
     var opmSearchTerm = '';
+    var opmActiveTag = null;
     function filterOpmEntries(term) {
+      opmActiveTag = null;
       opmSearchTerm = (term || '').trim().toUpperCase();
       renderOpmEntries();
     }
     function selectOpmTag(t) {
       var input = document.getElementById('opm-search');
-      if (input) input.value = (input.value.toUpperCase() === t.toUpperCase()) ? '' : t;
-      filterOpmEntries(input ? input.value : t);
+      var turningOff = input && input.value.toUpperCase() === t.toUpperCase();
+      if (turningOff) {
+        if (input) input.value = '';
+        filterOpmEntries('');
+      } else {
+        if (input) input.value = t;
+        filterOpmEntries(t);
+        opmActiveTag = t;
+      }
     }
     function renderOpmTags() {
       var wrap = document.getElementById('opm-tags-row');
@@ -2004,6 +2013,10 @@ create policy "acesso_publico_aportes" on aportes
       var wrap = document.getElementById('opm-entries-list');
       if (!wrap) return;
       renderOpmTags();
+      var addBtn = document.getElementById('opm-add-btn');
+      if (addBtn) {
+        addBtn.textContent = opmActiveTag ? ('\u2795 Adicionar Print em \u201c' + opmActiveTag.toUpperCase() + '\u201d') : '\u2795 Adicionar Print com Anota\u00e7\u00e3o';
+      }
       var list = opmEntriesCache;
       if (opmSearchTerm) {
         list = list.filter(function(e) { return (e.titulo || '').toUpperCase().indexOf(opmSearchTerm) !== -1; });
@@ -2043,7 +2056,13 @@ create policy "acesso_publico_aportes" on aportes
       setLoading(true);
       dbOpmAdd().then(function(rows) {
         var row = rows && rows[0];
-        if (row) opmEntriesCache.push(row);
+        if (!row) { renderOpmEntries(); return Promise.resolve(); }
+        opmEntriesCache.push(row);
+        if (opmActiveTag) {
+          row.titulo = opmActiveTag;
+          renderOpmEntries();
+          return dbOpmUpd(row.id, { titulo: opmActiveTag }).catch(function(e) { showToast('Erro ao definir t\u00edtulo: ' + e.message, 'error'); });
+        }
         renderOpmEntries();
       }).catch(function(e) { showToast('Erro ao adicionar: ' + e.message, 'error'); })
         .finally(function() { setLoading(false); });
