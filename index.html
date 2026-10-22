@@ -368,6 +368,14 @@
     .opm-title-inp::placeholder { color:#3f7a55; text-transform:uppercase; }
     .opm-entry-del { width:38px; height:38px; flex-shrink:0; border-radius:9px; background:var(--bear-dim); border:1px solid var(--bear); color:var(--bear); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .opm-entry-del:hover { opacity:.85; }
+    .opm-thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .opm-thumbs:empty { display:none; }
+    .opm-thumb { width:62px; height:62px; padding:0; border-radius:8px; overflow:hidden; background:#000; border:1px solid #31314f; cursor:pointer; opacity:.75; flex-shrink:0; transition:opacity .15s, border-color .15s; }
+    .opm-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .opm-thumb:hover { opacity:1; }
+    .opm-thumb.active { border:2px solid var(--bull); opacity:1; }
+    .opm-thumb-add { background:var(--surface2); border:1.5px dashed #31314f; color:#9a9ac2; font-size:22px; opacity:1; display:flex; align-items:center; justify-content:center; }
+    .opm-thumb-add:hover { border-color:var(--bull); color:var(--bull); }
     .opm-tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:0; }
     .opm-titles-card { border-color:var(--bull); background:rgba(0,230,118,.04); }
     .opm-tags-row:empty::before { content:'Nenhum titulo ainda. Os titulos aparecerao aqui automaticamente.'; font-size:12px; color:var(--muted); font-style:italic; }
@@ -2092,6 +2100,16 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         '<span class="op-method-img-badge">Toque para adicionar mais</span>' +
       '</div>';
     }
+    function opmThumbsHtml(id, imgs) {
+      imgs = imgs || [];
+      if (imgs.length < 2) return '';
+      var cur = opmImgIdx[id] || 0;
+      var h = imgs.map(function(src, i) {
+        return '<button type="button" class="opm-thumb' + (i === cur ? ' active' : '') + '" onclick="jumpOpmImg(' + id + ',' + i + ')" title="Imagem ' + (i + 1) + '"><img src="' + src + '" alt=""></button>';
+      }).join('');
+      h += '<button type="button" class="opm-thumb opm-thumb-add" onclick="document.getElementById(\'opm-file-' + id + '\').click()" title="Adicionar imagem">&#43;</button>';
+      return h;
+    }
     function opmEntryHtml(e) {
       var id = e.id;
       return '<div class="cmp-card opm-entry-card">' +
@@ -2103,6 +2121,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
           '<div class="op-method-img-col">' +
             '<input type="file" id="opm-file-' + id + '" accept="image/*" multiple style="display:none" onchange="handleOpmFileChange(' + id + ', this)">' +
             '<div class="op-method-img-zone" id="opm-imgzone-' + id + '" tabindex="0" data-idx="' + id + '" onclick="document.getElementById(\'opm-file-' + id + '\').click()">' + opmImgZoneHtml(id, e.imagens) + '</div>' +
+            '<div class="opm-thumbs" id="opm-thumbs-' + id + '">' + opmThumbsHtml(id, e.imagens) + '</div>' +
           '</div>' +
           '<div class="op-method-notes-col">' +
             '<label class="f-lbl">Anota&#231;&#245;es</label>' +
@@ -2170,6 +2189,8 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
       var item = opmEntriesCache.find(function(e) { return e.id === id; });
       var zone = document.getElementById('opm-imgzone-' + id);
       if (zone && item) zone.innerHTML = opmImgZoneHtml(id, item.imagens);
+      var th = document.getElementById('opm-thumbs-' + id);
+      if (th && item) th.innerHTML = opmThumbsHtml(id, item.imagens);
     }
     var opmFieldDebounceFns = {};
     function updOpmField(id, field, val) {
