@@ -376,6 +376,9 @@
     .opm-thumb.active { border:2px solid var(--bull); opacity:1; }
     .opm-thumb-add { background:var(--surface2); border:1.5px dashed #31314f; color:#9a9ac2; font-size:22px; opacity:1; display:flex; align-items:center; justify-content:center; }
     .opm-thumb-add:hover { border-color:var(--bull); color:var(--bull); }
+    .opm-search-row { display:flex; gap:8px; align-items:stretch; margin-bottom:12px; }
+    .opm-search-row .f-inp { flex:1; min-width:0; }
+    .opm-search-row .aporte-cat-btn { font-size:12px; padding:0 14px; }
     .opm-tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:0; }
     .opm-titles-card { border-color:var(--bull); background:rgba(0,230,118,.04); }
     .opm-tags-row:empty::before { content:'Nenhum titulo ainda. Os titulos aparecerao aqui automaticamente.'; font-size:12px; color:var(--muted); font-style:italic; }
@@ -1095,7 +1098,15 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
 
         <div class="cmp-card opm-titles-card">
           <div class="cmp-sec-title">&#128204; Meus T&#237;tulos</div>
-          <input type="text" class="f-inp" id="opm-search" placeholder="Buscar por t&#237;tulo... ex: MARCA&#199;&#213;ES" oninput="filterOpmEntries(this.value)" style="margin-bottom:12px">
+          <div class="opm-search-row">
+            <input type="text" class="f-inp" id="opm-search" placeholder="Buscar por t&#237;tulo... ex: MARCA&#199;&#213;ES" oninput="filterOpmEntries(this.value)">
+            <button class="aporte-cat-btn ok" type="button" onclick="showOpmThemeForm()">&#43; Novo tema</button>
+          </div>
+          <div class="aporte-cat-form" id="opm-theme-form" style="display:none;margin-top:0;margin-bottom:12px">
+            <input type="text" class="aporte-cat-input" id="opm-theme-nome" placeholder="Nome do novo tema" onkeydown="if(event.key==='Enter'){saveOpmTheme();}">
+            <button class="aporte-cat-btn ok" type="button" onclick="saveOpmTheme()">Criar tema</button>
+            <button class="aporte-cat-btn" type="button" onclick="hideOpmThemeForm()">Cancelar</button>
+          </div>
           <div class="opm-tags-row" id="opm-tags-row"></div>
         </div>
 
@@ -2062,7 +2073,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     function dbAportesDel(id) { return supaReq('aportes?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
     function dbOpmList() { return supaReq('operacional_entries?select=id,titulo,notas,imagens&order=criado_em.asc'); }
-    function dbOpmAdd() { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: '', notas: '', imagens: [] }) }); }
+    function dbOpmAdd(titulo) { return supaReq('operacional_entries', { method: 'POST', body: JSON.stringify({ titulo: titulo || '', notas: '', imagens: [] }) }); }
     function dbOpmUpd(id, fields) { return supaReq('operacional_entries?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
     function dbOpmDel(id) { return supaReq('operacional_entries?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
@@ -2132,8 +2143,8 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     }
     var opmSearchTerm = '';
     var opmActiveTag = null;
-    function filterOpmEntries(term) {
-      opmActiveTag = null;
+    function filterOpmEntries(term, activeTag) {
+      opmActiveTag = activeTag || null;
       opmSearchTerm = (term || '').trim().toUpperCase();
       renderOpmEntries();
     }
@@ -2145,22 +2156,58 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         filterOpmEntries('');
       } else {
         if (input) input.value = t;
-        filterOpmEntries(t);
-        opmActiveTag = t;
+        filterOpmEntries(t, t);
       }
+    }
+    function showOpmThemeForm() {
+      var form = document.getElementById('opm-theme-form');
+      var input = document.getElementById('opm-theme-nome');
+      if (!form || !input) return;
+      input.value = '';
+      form.style.display = 'flex';
+      input.focus();
+    }
+    function hideOpmThemeForm() {
+      var form = document.getElementById('opm-theme-form');
+      if (form) form.style.display = 'none';
+    }
+    function saveOpmTheme() {
+      var input = document.getElementById('opm-theme-nome');
+      var nome = input.value.trim();
+      if (!nome) { showToast('Digite o nome do tema.', 'error'); return; }
+      var lower = nome.toLowerCase();
+      var existing = opmEntriesCache.find(function(e) { return (e.titulo || '').trim().toLowerCase() === lower; });
+      var search = document.getElementById('opm-search');
+      if (existing) {
+        hideOpmThemeForm();
+        if (search) search.value = '';
+        selectOpmTag((existing.titulo || '').trim());
+        showToast('Esse tema j\u00e1 existe. Selecionei para voc\u00ea.', 'success');
+        return;
+      }
+      setLoading(true);
+      dbOpmAdd(nome).then(function(rows) {
+        var row = rows && rows[0];
+        if (row) opmEntriesCache.push(row);
+        hideOpmThemeForm();
+        if (search) search.value = '';
+        selectOpmTag(nome);
+        showToast('Tema criado! Agora adicione o print.', 'success');
+      }).catch(function(e) { showToast('Erro ao criar tema: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
     }
     function renderOpmTags() {
       var wrap = document.getElementById('opm-tags-row');
       if (!wrap) return;
-      var titles = [];
+      var titles = [], seen = {};
       opmEntriesCache.forEach(function(e) {
         var t = (e.titulo || '').trim();
-        if (t && titles.indexOf(t) === -1) titles.push(t);
+        if (t && !seen[t.toLowerCase()]) { seen[t.toLowerCase()] = true; titles.push(t); }
       });
       if (!titles.length) { wrap.innerHTML = ''; return; }
       wrap.innerHTML = titles.map(function(t) {
         var isActive = opmSearchTerm && t.toUpperCase() === opmSearchTerm;
-        return '<button class="opm-tag-btn' + (isActive ? ' active' : '') + '" onclick="selectOpmTag(\'' + t.replace(/'/g, "\\'") + '\')">' + escHtml(t) + '</button>';
+        return '<button class="opm-tag-btn' + (isActive ? ' active' : '') + '" data-t="' + escHtml(t) + '" onclick="selectOpmTag(this.dataset.t)">' + escHtml(t) + '</button>';
       }).join('');
     }
     function renderOpmEntries() {
