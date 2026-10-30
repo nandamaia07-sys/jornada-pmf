@@ -127,6 +127,12 @@
     .bnav-btn .ico { font-size:19px; } .bnav-btn.active { color:var(--blue); }
     /* STATS */
     .stats-wrap { padding:14px; }
+    .risk-subnav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .risk-subtab { padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; }
+    .risk-subtab:hover { border-color:var(--blue); color:var(--blue); }
+    .risk-subtab.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+    .risk-sec { display:none; }
+    .risk-sec.active { display:block; }
     .stats-conta-info { text-align:center; font-size:12px; font-weight:700; color:var(--bull); background:var(--bull-dim); border:1px solid var(--bull); border-radius:10px; padding:10px 14px; margin-bottom:16px; }
     .stats-date-filter-row { display:flex; gap:8px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap; }
     .stats-date-field { flex:1; min-width:100px; }
@@ -700,6 +706,15 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     <div class="tab" id="tab-stats">
       <div class="stats-wrap">
 
+        <div class="risk-subnav">
+          <button class="risk-subtab active" data-sec="conta" onclick="switchRiskSub('conta')">&#128994; Opera&#231;&#245;es na conta real</button>
+          <button class="risk-subtab" data-sec="metas" onclick="switchRiskSub('metas')">&#128176; Metas do M&#234;s</button>
+          <button class="risk-subtab" data-sec="ganhos" onclick="switchRiskSub('ganhos')">&#128197; Ganhos por M&#234;s</button>
+          <button class="risk-subtab" data-sec="aportes" onclick="switchRiskSub('aportes')">&#128181; Aportes de Capital</button>
+        </div>
+
+        <div class="risk-sec active" id="risk-sec-conta">
+
         <div class="cmp-card" style="margin-top:0">
           <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
@@ -825,6 +840,10 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
           </div>
         </div>
 
+        </div>
+
+        <div class="risk-sec" id="risk-sec-metas">
+
         <div class="cmp-card">
           <div class="cmp-sec-title">&#128176; Metas do M&#234;s</div>
           <p class="cmp-hint" style="margin-bottom:14px">Ex: Pagar conta da TV / canais &#8212; R$ 120,00</p>
@@ -836,6 +855,10 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
           </div>
         </div>
 
+        </div>
+
+        <div class="risk-sec" id="risk-sec-ganhos">
+
         <div class="cmp-card">
           <div class="cmp-sec-title">&#128197; Ganhos por M&#234;s</div>
           <div class="cmp-ganhos-grid" id="ops-ganhos-grid"></div>
@@ -844,6 +867,10 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
             <strong id="ops-ganhos-total">R$ 0,00</strong>
           </div>
         </div>
+
+        </div>
+
+        <div class="risk-sec" id="risk-sec-aportes">
 
         <div class="cmp-card" id="s-aportes-card">
           <div class="cmp-sec-title">&#128181; Aportes de Capital</div>
@@ -881,6 +908,8 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
             <span>Total Geral de Aportes</span>
             <strong id="aportes-total-geral">R$ 0,00</strong>
           </div>
+        </div>
+
         </div>
       </div>
     </div>
@@ -2012,6 +2041,12 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     }
 
     /* TABS */
+    var riskSub = 'conta';
+    function switchRiskSub(sec) {
+      riskSub = sec;
+      document.querySelectorAll('.risk-sec').forEach(function(el) { el.classList.toggle('active', el.id === 'risk-sec-' + sec); });
+      document.querySelectorAll('.risk-subtab').forEach(function(b) { b.classList.toggle('active', b.dataset.sec === sec); });
+    }
     function switchTab(tab) {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
       document.getElementById('tab-'+tab).classList.add('active');
