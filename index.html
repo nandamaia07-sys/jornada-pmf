@@ -133,6 +133,8 @@
     .risk-subtab.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
     .rd-selectors { display:flex; gap:10px; margin-bottom:10px; }
     .rd-sel-field { flex:1; min-width:0; }
+    .rd-yield { margin-top:4px; }
+    .rd-yield-hint { font-size:11px; color:var(--muted); text-align:center; }
     .rd-info { font-size:12px; font-weight:700; color:#9a9ac2; margin-bottom:12px; }
     .rd-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:8px; }
     .rd-day { background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:8px; display:flex; flex-direction:column; gap:6px; }
@@ -519,6 +521,7 @@ create table meta_limite_dia (
   id int primary key default 1,
   data date,
   banca numeric,
+  banca_inicial numeric,
   stop_pct numeric,
   gain_pct numeric,
   gains jsonb default '[]'::jsonb,
@@ -737,12 +740,16 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
         <div class="risk-sec active" id="risk-sec-conta">
 
         <div class="cmp-card" style="margin-top:0">
-          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Win Mini &#205;ndice &#8212; Real (R$)</div>
+          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Mini &#205;ndice &#8212; Real (R$)</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
             <div class="cmp-meta-field">
               <label class="f-lbl">Data</label>
               <input type="date" class="f-inp-valor cmp-meta-inp" id="ops-data" style="text-transform:none" oninput="calcCmpMeta('ops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca inicial (valor aportado)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="ops-banca-inicial" placeholder="0.00" step="0.01" min="0" oninput="onBancaInicialInput('ops')">
             </div>
             <div class="cmp-meta-field">
               <label class="f-lbl">Banca do Dia</label>
@@ -781,7 +788,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
         </div>
 
         <div class="cmp-card">
-          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio &#8212; Win Mini &#205;ndice (R$)</div>
+          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio &#8212; Mini &#205;ndice (R$)</div>
           <div class="rd-selectors">
             <div class="rd-sel-field">
               <label class="f-lbl">Ano</label>
@@ -798,6 +805,17 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
             <span>Resultado do m&#234;s</span>
             <strong id="rd-win-total">R$ 0,00</strong>
           </div>
+          <div class="rd-yield">
+            <div class="cmp-total-row">
+              <span>Rendimento no m&#234;s (sobre a banca inicial)</span>
+              <strong id="rd-win-pct-mes">&#8212;</strong>
+            </div>
+            <div class="cmp-total-row">
+              <span>Acumulado (todos os meses)</span>
+              <strong id="rd-win-pct-acum">&#8212;</strong>
+            </div>
+            <div class="rd-yield-hint" id="rd-win-pct-hint">Preencha a Banca inicial no painel acima para ver quanto voc&#234; ganhou ou perdeu em %.</div>
+          </div>
         </div>
 
         <div class="cmp-card" style="margin-top:6px">
@@ -807,6 +825,10 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
             <div class="cmp-meta-field">
               <label class="f-lbl">Data</label>
               <input type="date" class="f-inp-valor cmp-meta-inp" id="fx-data" style="text-transform:none" oninput="calcCmpMeta('fx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca inicial (valor aportado)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="fx-banca-inicial" placeholder="0.00" step="0.01" min="0" oninput="onBancaInicialInput('fx')">
             </div>
             <div class="cmp-meta-field">
               <label class="f-lbl">Banca do Dia</label>
@@ -861,6 +883,17 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
           <div class="cmp-total-row" style="margin-top:12px">
             <span>Resultado do m&#234;s</span>
             <strong id="rd-fx-total">US$ 0,00</strong>
+          </div>
+          <div class="rd-yield">
+            <div class="cmp-total-row">
+              <span>Rendimento no m&#234;s (sobre a banca inicial)</span>
+              <strong id="rd-fx-pct-mes">&#8212;</strong>
+            </div>
+            <div class="cmp-total-row">
+              <span>Acumulado (todos os meses)</span>
+              <strong id="rd-fx-pct-acum">&#8212;</strong>
+            </div>
+            <div class="rd-yield-hint" id="rd-fx-pct-hint">Preencha a Banca inicial no painel acima para ver quanto voc&#234; ganhou ou perdeu em %.</div>
           </div>
         </div>
 
@@ -1050,7 +1083,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
         </div>
 
         <div class="cmp-card">
-          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Win Mini &#205;ndice &#8212; Real (R$)</div>
+          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Mini &#205;ndice &#8212; Real (R$)</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
             <div class="cmp-meta-field">
@@ -2666,6 +2699,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
         var b = document.getElementById(px + '-banca'); if (b) b.value = (row.banca != null ? row.banca : '');
         var s = document.getElementById(px + '-stop-pct'); if (s) s.value = (row.stop_pct != null ? row.stop_pct : '');
         var g = document.getElementById(px + '-gain-pct'); if (g) g.value = (row.gain_pct != null ? row.gain_pct : '');
+        var bi = document.getElementById(px + '-banca-inicial'); if (bi) bi.value = (row.banca_inicial != null ? row.banca_inicial : '');
         for (var i = 1; i <= 5; i++) {
           var eg = document.getElementById(px + '-entry-' + i); if (eg) eg.value = (gains[i-1] != null ? gains[i-1] : '');
           var el = document.getElementById(px + '-loss-' + i); if (el) el.value = (losses[i-1] != null ? losses[i-1] : '');
@@ -2676,6 +2710,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
       return Promise.all([dbMetaGet(1), dbMetaGet(2)]).then(function(r) {
         fillMetaFields(['cmp','ops'], (r[0] && r[0][0]) || {});
         fillMetaFields(['fx'], (r[1] && r[1][0]) || {});
+        updateRdYield('win'); updateRdYield('fx');
       }).catch(function(e) { showToast('Erro ao carregar meta do dia: ' + e.message, 'error'); });
     }
     function collectMeta(px) {
@@ -2792,7 +2827,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
     }
     function resetCmpMeta(px) {
       var isFx = px === 'fx';
-      showGenConfirm('Reiniciar o dia (' + (isFx ? 'Forex' : 'Win Mini \u00cdndice') + ')?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+      showGenConfirm('Reiniciar o dia (' + (isFx ? 'Forex' : 'Mini \u00cdndice') + ')?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
         setLoading(true);
         dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] }, isFx ? 2 : 1)
           .then(function() { return loadCmpMetaFromCloud(); })
@@ -2807,6 +2842,71 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
     var RD_DIAS = ['dom','seg','ter','qua','qui','sex','s\u00e1b'];
     var rdVals = { win: {}, fx: {} };
     var rdTimers = {};
+    var rdPending = {};
+    function flushRd(m) {
+      var ps = [];
+      Object.keys(rdPending).forEach(function(tk) {
+        var it = rdPending[tk];
+        if (it.m === m) { clearTimeout(rdTimers[tk]); delete rdPending[tk]; ps.push(it.fn()); }
+      });
+      return Promise.all(ps);
+    }
+    var rdOutside = { win: null, fx: null };
+    var bancaInicialTimers = {};
+    function onBancaInicialInput(px) {
+      var el = document.getElementById(px + '-banca-inicial');
+      if (!el) return;
+      updateRdYield(px === 'fx' ? 'fx' : 'win');
+      var v = parseFloat(el.value);
+      clearTimeout(bancaInicialTimers[px]);
+      bancaInicialTimers[px] = setTimeout(function() {
+        dbMetaSet({ banca_inicial: isNaN(v) ? null : v }, px === 'fx' ? 2 : 1)
+          .catch(function(e) { showToast('Erro ao salvar a banca inicial: ' + e.message, 'error'); });
+      }, 600);
+    }
+    function dbRdSumAll(m) {
+      var total = 0;
+      function page(off) {
+        return supaReq('resultados_diarios?select=valor&mercado=eq.' + m + '&order=data.asc&limit=1000&offset=' + off).then(function(rows) {
+          rows = rows || [];
+          rows.forEach(function(r) { var v = parseFloat(r.valor); if (!isNaN(v)) total += v; });
+          return rows.length === 1000 ? page(off + 1000) : total;
+        });
+      }
+      return page(0);
+    }
+    function rdPct(v) { return (v >= 0 ? '+ ' : '\u2212 ') + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%'; }
+    function rdSigned(m, v) { return (v >= 0 ? '+ ' : '\u2212 ') + rdFmt(m, Math.abs(v)); }
+    function rdMonthTotalValue(m) {
+      var sel = rdSel(m); if (!sel) return 0;
+      var total = 0;
+      for (var d = 1; d <= sel.dias; d++) {
+        var v = parseFloat(rdVals[m][sel.ano + '-' + rdPad(sel.mes) + '-' + rdPad(d)]);
+        if (!isNaN(v)) total += v;
+      }
+      return total;
+    }
+    function updateRdYield(m) {
+      var px = m === 'fx' ? 'fx' : 'ops';
+      var bi = document.getElementById(px + '-banca-inicial');
+      var elMes = document.getElementById('rd-' + m + '-pct-mes'), elAc = document.getElementById('rd-' + m + '-pct-acum'), hint = document.getElementById('rd-' + m + '-pct-hint');
+      if (!bi || !elMes || !elAc) return;
+      var base = parseFloat(bi.value);
+      if (isNaN(base) || base <= 0) {
+        elMes.textContent = '\u2014'; elMes.className = '';
+        elAc.textContent = '\u2014'; elAc.className = '';
+        if (hint) hint.style.display = 'block';
+        return;
+      }
+      if (hint) hint.style.display = 'none';
+      var mes = rdMonthTotalValue(m);
+      elMes.textContent = rdPct(mes / base * 100);
+      elMes.className = mes > 0 ? 'pos' : (mes < 0 ? 'neg' : '');
+      if (rdOutside[m] === null) { elAc.textContent = '\u2026'; elAc.className = ''; return; }
+      var ac = rdOutside[m] + mes;
+      elAc.textContent = rdSigned(m, ac) + ' (' + rdPct(ac / base * 100) + ')';
+      elAc.className = ac > 0 ? 'pos' : (ac < 0 ? 'neg' : '');
+    }
     function rdFmt(m, v) { return (m === 'fx' ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function rdPad(n) { return n < 10 ? '0' + n : '' + n; }
     function rdSel(m) {
@@ -2830,8 +2930,9 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
     }
     function changeRdPeriod(m) {
       rdVals[m] = {};
+      rdOutside[m] = null;
       renderResultadosMes(m);
-      loadResultadosMes(m);
+      flushRd(m).then(function() { loadResultadosMes(m); });
     }
     function loadResultadosMes(m) {
       var sel = rdSel(m); if (!sel) return Promise.resolve();
@@ -2840,8 +2941,15 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
         var now2 = rdSel(m);
         if (!now2 || now2.ano !== sel.ano || now2.mes !== sel.mes) return;
         rdVals[m] = {};
-        (rows || []).forEach(function(r) { rdVals[m][r.data] = r.valor; });
+        var monthSum = 0;
+        (rows || []).forEach(function(r) { rdVals[m][r.data] = r.valor; var v = parseFloat(r.valor); if (!isNaN(v)) monthSum += v; });
         renderResultadosMes(m);
+        return dbRdSumAll(m).then(function(all) {
+          var now3 = rdSel(m);
+          if (!now3 || now3.ano !== sel.ano || now3.mes !== sel.mes) return;
+          rdOutside[m] = all - monthSum;
+          updateRdYield(m);
+        });
       }).catch(function(e) { showToast('Erro ao carregar os resultados do m\u00eas: ' + e.message, 'error'); });
     }
     function renderResultadosMes(m) {
@@ -2872,6 +2980,7 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
       }
       el.textContent = (total >= 0 ? '+ ' : '\u2212 ') + rdFmt(m, Math.abs(total));
       el.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
+      updateRdYield(m);
     }
     function updResultadoDia(m, d, val) {
       var sel = rdSel(m); if (!sel) return;
@@ -2884,10 +2993,12 @@ create policy "acesso_publico_resultados_diarios" on resultados_diarios
       updateResultadoTotal(m);
       var tk = m + key;
       clearTimeout(rdTimers[tk]);
-      rdTimers[tk] = setTimeout(function() {
+      var fn = function() {
         var pr = has ? dbRdUpsert(m, key, num) : dbRdDel(m, key);
-        pr.catch(function(e) { showToast('Erro ao salvar o dia: ' + e.message, 'error'); });
-      }, 600);
+        return pr.catch(function(e) { showToast('Erro ao salvar o dia: ' + e.message, 'error'); });
+      };
+      rdPending[tk] = { m: m, fn: fn };
+      rdTimers[tk] = setTimeout(function() { delete rdPending[tk]; fn(); }, 600);
     }
 
     /* METAS DO MES (nuvem: metas_mes) */
