@@ -745,26 +745,6 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
           <button class="cmp-reset-btn" onclick="resetCmpMeta()">&#8635; Reiniciar dia</button>
         </div>
 
-        <div class="cmp-card">
-          <div class="cmp-sec-title">&#128176; Metas do M&#234;s</div>
-          <p class="cmp-hint" style="margin-bottom:14px">Ex: Pagar conta da TV / canais &#8212; R$ 120,00</p>
-          <div id="ops-metames-list"></div>
-          <button class="cmp-add-meta-btn" onclick="addCmpMetaMes()">&#43; Adicionar meta</button>
-          <div class="cmp-total-row" style="margin-top:12px">
-            <span>Total das metas</span>
-            <strong id="ops-metames-total">R$ 0,00</strong>
-          </div>
-        </div>
-
-        <div class="cmp-card">
-          <div class="cmp-sec-title">&#128197; Ganhos por M&#234;s</div>
-          <div class="cmp-ganhos-grid" id="ops-ganhos-grid"></div>
-          <div class="cmp-total-row" style="margin-top:12px">
-            <span>Total do ano</span>
-            <strong id="ops-ganhos-total">R$ 0,00</strong>
-          </div>
-        </div>
-
         <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
 
         <div class="stats-date-filter-row">
@@ -842,6 +822,26 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
               <span class="leg-item bear"><span class="leg-dot" style="background:var(--bear)"></span>Stops</span>
             </div>
             <div class="monthly-scroll"><svg id="monthly-svg" viewBox="0 0 300 130" preserveAspectRatio="xMinYMid meet"></svg></div>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128176; Metas do M&#234;s</div>
+          <p class="cmp-hint" style="margin-bottom:14px">Ex: Pagar conta da TV / canais &#8212; R$ 120,00</p>
+          <div id="ops-metames-list"></div>
+          <button class="cmp-add-meta-btn" onclick="addCmpMetaMes()">&#43; Adicionar meta</button>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total das metas</span>
+            <strong id="ops-metames-total">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Ganhos por M&#234;s</div>
+          <div class="cmp-ganhos-grid" id="ops-ganhos-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Total do ano</span>
+            <strong id="ops-ganhos-total">R$ 0,00</strong>
           </div>
         </div>
 
