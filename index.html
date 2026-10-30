@@ -131,6 +131,17 @@
     .risk-subtab { padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; }
     .risk-subtab:hover { border-color:var(--blue); color:var(--blue); }
     .risk-subtab.active { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+    .rd-selectors { display:flex; gap:10px; margin-bottom:10px; }
+    .rd-sel-field { flex:1; min-width:0; }
+    .rd-info { font-size:12px; font-weight:700; color:#9a9ac2; margin-bottom:12px; }
+    .rd-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:8px; }
+    .rd-day { background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:8px; display:flex; flex-direction:column; gap:6px; }
+    .rd-day-num { font-size:12px; font-weight:800; color:#9a9ac2; display:flex; justify-content:space-between; align-items:baseline; }
+    .rd-day-num small { font-size:9px; font-weight:600; text-transform:uppercase; color:var(--muted); }
+    .rd-day-inp { width:100%; background:#1c1c34; border:1px solid #31314f; border-radius:7px; padding:8px 6px; color:var(--text); font-family:var(--mono); font-size:12px; font-weight:700; text-align:right; outline:none; }
+    .rd-day-inp:focus { border-color:var(--blue); }
+    .rd-day-inp.pos { color:var(--bull); border-color:var(--bull); }
+    .rd-day-inp.neg { color:var(--bear); border-color:var(--bear); }
     .risk-sec { display:none; }
     .risk-sec.active { display:block; }
     .stats-conta-info { text-align:center; font-size:12px; font-weight:700; color:var(--bull); background:var(--bull-dim); border:1px solid var(--bull); border-radius:10px; padding:10px 14px; margin-bottom:16px; }
@@ -591,6 +602,16 @@ create table aporte_categorias (
 );
 alter table aporte_categorias enable row level security;
 create policy "acesso_publico_aporte_categorias" on aporte_categorias
+  for all using (true) with check (true);
+
+create table resultados_diarios (
+  mercado text not null,
+  data date not null,
+  valor numeric,
+  primary key (mercado, data)
+);
+alter table resultados_diarios enable row level security;
+create policy "acesso_publico_resultados_diarios" on resultados_diarios
   for all using (true) with check (true);</pre>
         <button class="cfg-copy-btn" onclick="copySQL()">&#128203; Copiar SQL</button>
       </details>
@@ -716,7 +737,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         <div class="risk-sec active" id="risk-sec-conta">
 
         <div class="cmp-card" style="margin-top:0">
-          <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
+          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Win Mini &#205;ndice &#8212; Real (R$)</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
             <div class="cmp-meta-field">
@@ -756,87 +777,90 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
             <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="ops-meta-bar-fill"></div></div>
             <div class="cmp-meta-bar-label" id="ops-meta-bar-label">Registre suas entradas para acompanhar</div>
           </div>
-          <button class="cmp-export-btn" onclick="exportCmpTradeDia()">&#128228; Exportar Trade do Dia</button>
-          <button class="cmp-reset-btn" onclick="resetCmpMeta()">&#8635; Reiniciar dia</button>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta('ops')">&#8635; Reiniciar dia</button>
         </div>
 
-        <div class="stats-conta-info">&#128994; Opera&#231;&#245;es na conta real &#8212; dados do campo Metas e Limite do Dia</div>
-
-        <div class="stats-date-filter-row">
-          <div class="stats-date-field">
-            <label class="f-lbl">Ano</label>
-            <select class="stats-date-select" id="stats-filter-ano" onchange="applyStatsDateFilter()">
-              <option value="">Todos</option>
-            </select>
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio &#8212; Win Mini &#205;ndice (R$)</div>
+          <div class="rd-selectors">
+            <div class="rd-sel-field">
+              <label class="f-lbl">Ano</label>
+              <select class="stats-date-select" id="rd-win-ano" onchange="changeRdPeriod('win')"></select>
+            </div>
+            <div class="rd-sel-field">
+              <label class="f-lbl">M&#234;s</label>
+              <select class="stats-date-select" id="rd-win-mes" onchange="changeRdPeriod('win')"><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
+            </div>
           </div>
-          <div class="stats-date-field">
-            <label class="f-lbl">M&#234;s</label>
-            <select class="stats-date-select" id="stats-filter-mes" onchange="applyStatsDateFilter()">
-              <option value="">Todos</option>
-              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option>
-              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
-              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
-              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
+          <div class="rd-info" id="rd-win-info"></div>
+          <div class="rd-grid" id="rd-win-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Resultado do m&#234;s</span>
+            <strong id="rd-win-total">R$ 0,00</strong>
           </div>
-          <div class="stats-date-field">
-            <label class="f-lbl">Data Espec&#237;fica</label>
-            <input type="date" class="stats-date-select" id="stats-filter-dia" onchange="applyStatsDateFilter()">
-          </div>
-          <button class="stats-date-clear-btn" onclick="clearStatsDateFilter()">&#10005; Limpar</button>
-        </div>
-        <div class="stats-actions-row">
-          <button class="stats-action-btn" id="stats-undo-btn" onclick="undoStats()" disabled>&#8630; Voltar</button>
-          <button class="stats-action-btn" id="stats-redo-btn" onclick="redoStats()" disabled>&#8631; Refazer</button>
-          <button class="stats-action-btn danger" onclick="resetStatsAll()">&#128465;&#65039; Reiniciar</button>
         </div>
 
-        <div class="cmp-card" id="s-banca-card" style="display:none">
-          <div class="cmp-sec-title">&#128176; Evolu&#231;&#227;o da Banca</div>
-          <div class="stats-banca-row stats-banca-row-3">
-            <div class="stats-banca-box">
-              <span>&#218;ltima Banca</span>
-              <strong id="s-banca-val">R$ 0,00</strong>
+        <div class="cmp-card" style="margin-top:6px">
+          <div class="cmp-real-tag">&#128177; Opera&#231;&#245;es no Forex &#8212; D&#243;lar (US$)</div>
+          <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="fx-data" style="text-transform:none" oninput="calcCmpMeta('fx')">
             </div>
-            <div class="stats-banca-box">
-              <span>Resultado Acumulado</span>
-              <strong id="s-banca-resultado">&#8212;</strong>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca do Dia</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="fx-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('fx')">
             </div>
-            <div class="stats-banca-box">
-              <span>Saldo Atual</span>
-              <strong id="s-banca-saldo">&#8212;</strong>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Stop Loss (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="fx-stop-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('fx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Meta Gain (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="fx-gain-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('fx')">
             </div>
           </div>
-          <div id="s-banca-hist-list" class="stats-banca-hist-list"></div>
+          <div class="cmp-calc-row">
+            <div class="cmp-calc-box bear"><span>Limite de Perda</span><strong id="fx-stop-val">US$ 0,00</strong></div>
+            <div class="cmp-calc-box bull"><span>Meta de Ganho</span><strong id="fx-gain-val">US$ 0,00</strong></div>
+          </div>
+          <div class="cmp-sec-title" style="margin-top:20px">&#128200; Entradas de Gain</div>
+          <div class="cmp-entries-grid" id="fx-entries-grid"></div>
+          <div class="cmp-sec-title" style="margin-top:14px">&#128201; Entradas de Loss</div>
+          <div class="cmp-entries-grid" id="fx-loss-grid"></div>
+          <div class="cmp-total-row">
+            <span>Resultado acumulado</span>
+            <strong id="fx-total-val">US$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Saldo Atual (Banca + Resultado)</span>
+            <strong id="fx-saldo-val">US$ 0,00</strong>
+          </div>
+          <div class="cmp-meta-bar-wrap">
+            <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="fx-meta-bar-fill"></div></div>
+            <div class="cmp-meta-bar-label" id="fx-meta-bar-label">Registre suas entradas para acompanhar</div>
+          </div>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta('fx')">&#8635; Reiniciar dia</button>
         </div>
 
-        <div id="s-empty" class="empty" style="display:none"><div class="empty-ico">&#128202;</div><p>Preencha as Entradas de Gain/Loss em &#128200;Opera&#231;&#245;es e clique em &#8220;Exportar Trade do Dia&#8221; para ver as estat&#237;sticas.</p></div>
-        <div id="s-content">
-          <div class="stats-grid">
-            <div class="scard full"><div class="sval blue" id="s-total">0</div><div class="slbl">Total de Opera&#231;&#245;es</div></div>
-            <div class="scard"><div class="sval bull" id="s-gains">0</div><div class="slbl">&#9989; Gains</div></div>
-            <div class="scard"><div class="sval bear" id="s-stops">0</div><div class="slbl">&#10060; Stops</div></div>
-            <div class="scard full"><div class="sval blue" id="s-wr">&#8212;</div><div class="slbl">Win Rate</div></div>
-          </div>
-          <div class="streak-card" id="s-streak" style="display:none">
-            <span class="streak-ico" id="s-streak-ico">&#128293;</span>
-            <div class="streak-body"><strong id="s-streak-txt"></strong><span>Sequ&#234;ncia atual</span></div>
-          </div>
-          <div class="chart-card" id="s-chart-wrap" style="display:none">
-            <div class="chart-title">Curva de Resultado</div>
-            <div class="chart-svg-wrap"><svg class="chart-svg" id="equity-svg" viewBox="0 0 300 100" preserveAspectRatio="none"></svg></div>
-            <div class="winbar-wrap">
-              <div class="winbar"><div class="winbar-fill" id="winbar-fill" style="width:0%"></div></div>
-              <div class="winbar-labels"><span class="wl-g" id="wl-g">0 Gains</span><span class="wl-s" id="wl-s">0 Stops</span></div>
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio &#8212; Forex (US$)</div>
+          <div class="rd-selectors">
+            <div class="rd-sel-field">
+              <label class="f-lbl">Ano</label>
+              <select class="stats-date-select" id="rd-fx-ano" onchange="changeRdPeriod('fx')"></select>
+            </div>
+            <div class="rd-sel-field">
+              <label class="f-lbl">M&#234;s</label>
+              <select class="stats-date-select" id="rd-fx-mes" onchange="changeRdPeriod('fx')"><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
             </div>
           </div>
-          <div class="chart-card" id="s-monthly-wrap" style="display:none">
-            <div class="chart-title">Desempenho por M&#234;s</div>
-            <div class="chart-legend">
-              <span class="leg-item bull"><span class="leg-dot" style="background:var(--bull)"></span>Gains</span>
-              <span class="leg-item bear"><span class="leg-dot" style="background:var(--bear)"></span>Stops</span>
-            </div>
-            <div class="monthly-scroll"><svg id="monthly-svg" viewBox="0 0 300 130" preserveAspectRatio="xMinYMid meet"></svg></div>
+          <div class="rd-info" id="rd-fx-info"></div>
+          <div class="rd-grid" id="rd-fx-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Resultado do m&#234;s</span>
+            <strong id="rd-fx-total">US$ 0,00</strong>
           </div>
         </div>
 
@@ -1026,7 +1050,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         </div>
 
         <div class="cmp-card">
-          <div class="cmp-real-tag">&#128994; Opera&#231;&#245;es na conta real</div>
+          <div class="cmp-real-tag">&#128200; Opera&#231;&#245;es no Win Mini &#205;ndice &#8212; Real (R$)</div>
           <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
           <div class="cmp-meta-inputs-row">
             <div class="cmp-meta-field">
@@ -1069,7 +1093,6 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
             <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="cmp-meta-bar-fill"></div></div>
             <div class="cmp-meta-bar-label" id="cmp-meta-bar-label">Registre suas entradas para acompanhar</div>
           </div>
-          <button class="cmp-export-btn" onclick="exportCmpTradeDia()">&#128228; Exportar Trade do Dia</button>
           <button class="cmp-reset-btn" onclick="resetCmpMeta()">&#8635; Reiniciar dia</button>
         </div>
 
@@ -1953,48 +1976,10 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
       updateStats();
     }
     function updateStats() {
-      var empty = document.getElementById('s-empty'), cont = document.getElementById('s-content');
       refreshMetaPanel();
-      setLoading(true);
-      dbList().then(function(ops) {
-        setLoading(false);
-        updateStatsUndoButtons();
-        updateBancaCard();
-        loadAportes();
-        var exportados = ops.filter(function(o) { return o.origem === 'exportado'; });
-        populateStatsAnoOptions(exportados);
-        var filtered = exportados;
-        if (statsFilterDia) {
-          filtered = filtered.filter(function(o) { return new Date(o.ts).toISOString().slice(0, 10) === statsFilterDia; });
-        } else {
-          if (statsFilterAno) filtered = filtered.filter(function(o) { return new Date(o.ts).getFullYear() === parseInt(statsFilterAno, 10); });
-          if (statsFilterMes) filtered = filtered.filter(function(o) { return (new Date(o.ts).getMonth() + 1) === parseInt(statsFilterMes, 10); });
-        }
-        if (!filtered.length) {
-          empty.style.display = 'block'; cont.style.display = 'none';
-          empty.querySelector('p').textContent = (statsFilterAno || statsFilterMes || statsFilterDia)
-            ? 'Nenhuma opera\u00e7\u00e3o exportada encontrada nesse per\u00edodo.'
-            : 'Preencha as Entradas de Gain/Loss em \u{1F4D8}Opera\u00e7\u00f5es e clique em \u201cExportar Trade do Dia\u201d para ver as estat\u00edsticas.';
-          return;
-        }
-        empty.style.display = 'none'; cont.style.display = 'block';
-        var total = filtered.length, gains = filtered.filter(function(o) { return o.res === 'gain'; }).length;
-        var stops = filtered.filter(function(o) { return o.res === 'stop'; }).length;
-        var wr = Math.round((gains / total) * 100);
-        document.getElementById('s-total').textContent = total; document.getElementById('s-gains').textContent = gains;
-        document.getElementById('s-stops').textContent = stops; document.getElementById('s-wr').textContent = wr + '%';
-        document.getElementById('winbar-fill').style.width = wr + '%';
-        document.getElementById('wl-g').textContent = gains + (gains === 1 ? ' Gain' : ' Gains');
-        document.getElementById('wl-s').textContent = stops + (stops === 1 ? ' Stop' : ' Stops');
-        var chrono = filtered.slice().reverse(), last = chrono[chrono.length-1].res, streak = 0;
-        for (var i = chrono.length-1; i >= 0; i--) { if (chrono[i].res === last) streak++; else break; }
-        document.getElementById('s-streak').style.display = 'flex';
-        var isG = last === 'gain';
-        document.getElementById('s-streak-ico').innerHTML = isG ? '&#128293;' : '&#10052;&#65039;';
-        document.getElementById('s-streak-txt').innerHTML = '<span style="color:' + (isG ? 'var(--bull)' : 'var(--bear)') + '">' + streak + ' ' + (isG ? 'GAIN' : 'STOP') + (streak > 1 ? 'S' : '') + ' seguido' + (streak > 1 ? 's' : '') + '</span>';
-        document.getElementById('s-chart-wrap').style.display = 'block'; document.getElementById('s-monthly-wrap').style.display = 'block';
-        renderEquity(chrono); renderMonthlyChart(chrono);
-      }).catch(function() { setLoading(false); updateStatsUndoButtons(); });
+      loadAportes();
+      loadResultadosMes('win');
+      loadResultadosMes('fx');
     }
     function renderEquity(chrono) {
       var pts = [0]; chrono.forEach(function(op) { pts.push(pts[pts.length-1] + (op.res === 'gain' ? 1 : -1)); });
@@ -2077,8 +2062,11 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     function dbCmpConfigGet() { return supaReq('compromisso_config?id=eq.1&select=nome'); }
     function dbCmpConfigSet(nome) { return supaReq('compromisso_config?id=eq.1', { method: 'PATCH', body: JSON.stringify({ nome: nome }), headers: { 'Prefer': 'return=minimal' } }); }
 
-    function dbMetaGet() { return supaReq('meta_limite_dia?id=eq.1&select=*'); }
-    function dbMetaSet(fields) { return supaReq('meta_limite_dia?id=eq.1', { method: 'PATCH', body: JSON.stringify(fields), headers: { 'Prefer': 'return=minimal' } }); }
+    function dbMetaGet(id) { return supaReq('meta_limite_dia?id=eq.' + (id || 1) + '&select=*'); }
+    function dbMetaSet(fields, id) { return supaReq('meta_limite_dia?on_conflict=id', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([Object.assign({ id: id || 1 }, fields)]) }); }
+    function dbRdList(m, ini, fim) { return supaReq('resultados_diarios?select=data,valor&mercado=eq.' + m + '&data=gte.' + ini + '&data=lte.' + fim); }
+    function dbRdUpsert(m, data, valor) { return supaReq('resultados_diarios?on_conflict=mercado,data', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ mercado: m, data: data, valor: valor }]) }); }
+    function dbRdDel(m, data) { return supaReq('resultados_diarios?mercado=eq.' + m + '&data=eq.' + data, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }); }
 
     function dbMetamesList() { return supaReq('metas_mes?select=id,descricao,valor&order=criado_em.asc'); }
     function dbMetamesAdd(desc, valor) { return supaReq('metas_mes', { method: 'POST', body: JSON.stringify({ descricao: desc, valor: valor }) }); }
@@ -2647,7 +2635,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     /* META E LIMITE DO DIA (nuvem: meta_limite_dia) */
     function fmtBRL(v) { return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function renderCmpEntriesGrid() {
-      ['cmp','ops'].forEach(function(px) {
+      ['cmp','ops','fx'].forEach(function(px) {
         var gGrid = document.getElementById(px + '-entries-grid');
         if (gGrid && !gGrid.dataset.built) {
           var gHtml = '';
@@ -2670,61 +2658,75 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         }
       });
     }
+    function fillMetaFields(prefixes, row) {
+      var gains = row.gains || [];
+      var losses = row.losses || [];
+      prefixes.forEach(function(px) {
+        var dt = document.getElementById(px + '-data'); if (dt) dt.value = row.data || new Date().toISOString().slice(0,10);
+        var b = document.getElementById(px + '-banca'); if (b) b.value = (row.banca != null ? row.banca : '');
+        var s = document.getElementById(px + '-stop-pct'); if (s) s.value = (row.stop_pct != null ? row.stop_pct : '');
+        var g = document.getElementById(px + '-gain-pct'); if (g) g.value = (row.gain_pct != null ? row.gain_pct : '');
+        for (var i = 1; i <= 5; i++) {
+          var eg = document.getElementById(px + '-entry-' + i); if (eg) eg.value = (gains[i-1] != null ? gains[i-1] : '');
+          var el = document.getElementById(px + '-loss-' + i); if (el) el.value = (losses[i-1] != null ? losses[i-1] : '');
+        }
+      });
+    }
     function loadCmpMetaFromCloud() {
-      return dbMetaGet().then(function(rows) {
-        var row = (rows && rows[0]) || {};
-        var gains = row.gains || [];
-        var losses = row.losses || [];
-        ['cmp','ops'].forEach(function(px) {
-          var dt = document.getElementById(px + '-data'); if (dt) dt.value = row.data || new Date().toISOString().slice(0,10);
-          var b = document.getElementById(px + '-banca'); if (b) b.value = (row.banca != null ? row.banca : '');
-          var s = document.getElementById(px + '-stop-pct'); if (s) s.value = (row.stop_pct != null ? row.stop_pct : '');
-          var g = document.getElementById(px + '-gain-pct'); if (g) g.value = (row.gain_pct != null ? row.gain_pct : '');
-          for (var i = 1; i <= 5; i++) {
-            var eg = document.getElementById(px + '-entry-' + i); if (eg) eg.value = (gains[i-1] != null ? gains[i-1] : '');
-            var el = document.getElementById(px + '-loss-' + i); if (el) el.value = (losses[i-1] != null ? losses[i-1] : '');
-          }
-        });
+      return Promise.all([dbMetaGet(1), dbMetaGet(2)]).then(function(r) {
+        fillMetaFields(['cmp','ops'], (r[0] && r[0][0]) || {});
+        fillMetaFields(['fx'], (r[1] && r[1][0]) || {});
       }).catch(function(e) { showToast('Erro ao carregar meta do dia: ' + e.message, 'error'); });
     }
-    var saveMetaDebounced = debounce(function() {
-      var dataVal = document.getElementById('cmp-data').value;
-      var banca = parseFloat(document.getElementById('cmp-banca').value);
-      var stopPct = parseFloat(document.getElementById('cmp-stop-pct').value);
-      var gainPct = parseFloat(document.getElementById('cmp-gain-pct').value);
+    function collectMeta(px) {
+      var dataVal = document.getElementById(px + '-data').value;
+      var banca = parseFloat(document.getElementById(px + '-banca').value);
+      var stopPct = parseFloat(document.getElementById(px + '-stop-pct').value);
+      var gainPct = parseFloat(document.getElementById(px + '-gain-pct').value);
       var gains = [], losses = [];
       for (var i = 1; i <= 5; i++) {
-        var vg = document.getElementById('cmp-entry-' + i).value;
-        var vl = document.getElementById('cmp-loss-' + i).value;
+        var vg = document.getElementById(px + '-entry-' + i).value;
+        var vl = document.getElementById(px + '-loss-' + i).value;
         gains.push(vg === '' ? null : parseFloat(vg));
         losses.push(vl === '' ? null : parseFloat(vl));
       }
-      dbMetaSet({
+      return {
         data: dataVal || null,
         banca: isNaN(banca) ? null : banca,
         stop_pct: isNaN(stopPct) ? null : stopPct,
         gain_pct: isNaN(gainPct) ? null : gainPct,
         gains: gains,
         losses: losses
-      }).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+      };
+    }
+    var saveMetaDebounced = debounce(function() {
+      dbMetaSet(collectMeta('cmp'), 1).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
     }, 600);
+    var saveFxMetaDebounced = debounce(function() {
+      dbMetaSet(collectMeta('fx'), 2).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+    }, 600);
+    function fmtMeta(px, v) { return (px === 'fx' ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function calcCmpMeta(px) {
       px = px || 'cmp';
-      var otherPx = px === 'cmp' ? 'ops' : 'cmp';
+      var group = px === 'fx' ? ['fx'] : ['cmp','ops'];
+      var otherPx = px === 'fx' ? null : (px === 'cmp' ? 'ops' : 'cmp');
+      var fm = function(v) { return fmtMeta(px, v); };
       var banca = parseFloat(document.getElementById(px + '-banca').value) || 0;
       var stopPct = parseFloat(document.getElementById(px + '-stop-pct').value) || 0;
       var gainPct = parseFloat(document.getElementById(px + '-gain-pct').value) || 0;
 
-      var ob = document.getElementById(otherPx + '-banca'); if (ob) ob.value = document.getElementById(px + '-banca').value;
-      var os = document.getElementById(otherPx + '-stop-pct'); if (os) os.value = document.getElementById(px + '-stop-pct').value;
-      var og = document.getElementById(otherPx + '-gain-pct'); if (og) og.value = document.getElementById(px + '-gain-pct').value;
-      var od = document.getElementById(otherPx + '-data'); if (od) od.value = document.getElementById(px + '-data').value;
+      if (otherPx) {
+        var ob = document.getElementById(otherPx + '-banca'); if (ob) ob.value = document.getElementById(px + '-banca').value;
+        var os = document.getElementById(otherPx + '-stop-pct'); if (os) os.value = document.getElementById(px + '-stop-pct').value;
+        var og = document.getElementById(otherPx + '-gain-pct'); if (og) og.value = document.getElementById(px + '-gain-pct').value;
+        var od = document.getElementById(otherPx + '-data'); if (od) od.value = document.getElementById(px + '-data').value;
+      }
 
       var stopVal = banca * (stopPct / 100);
       var gainVal = banca * (gainPct / 100);
-      ['cmp','ops'].forEach(function(p) {
-        var sv = document.getElementById(p + '-stop-val'); if (sv) sv.textContent = fmtBRL(stopVal);
-        var gv = document.getElementById(p + '-gain-val'); if (gv) gv.textContent = fmtBRL(gainVal);
+      group.forEach(function(p) {
+        var sv = document.getElementById(p + '-stop-val'); if (sv) sv.textContent = fm(stopVal);
+        var gv = document.getElementById(p + '-gain-val'); if (gv) gv.textContent = fm(gainVal);
       });
 
       var totalGain = 0, totalLoss = 0;
@@ -2732,33 +2734,33 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         var elg = document.getElementById(px + '-entry-' + i);
         var vg = Math.abs(parseFloat(elg.value) || 0);
         if (!isNaN(vg)) totalGain += vg;
-        var oelg = document.getElementById(otherPx + '-entry-' + i);
+        var oelg = otherPx ? document.getElementById(otherPx + '-entry-' + i) : null;
         if (oelg) oelg.value = elg.value;
 
         var ell = document.getElementById(px + '-loss-' + i);
         var vl = Math.abs(parseFloat(ell.value) || 0);
         if (!isNaN(vl)) totalLoss += vl;
-        var oell = document.getElementById(otherPx + '-loss-' + i);
+        var oell = otherPx ? document.getElementById(otherPx + '-loss-' + i) : null;
         if (oell) oell.value = ell.value;
       }
       var total = totalGain - totalLoss;
 
-      ['cmp','ops'].forEach(function(p) {
+      group.forEach(function(p) {
         var totalEl = document.getElementById(p + '-total-val');
         if (!totalEl) return;
-        totalEl.textContent = (total >= 0 ? '+ ' : '\u2212 ') + fmtBRL(Math.abs(total));
+        totalEl.textContent = (total >= 0 ? '+ ' : '\u2212 ') + fm(Math.abs(total));
         totalEl.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
       });
 
       var saldoAtual = banca + total;
-      ['cmp','ops'].forEach(function(p) {
+      group.forEach(function(p) {
         var saldoEl = document.getElementById(p + '-saldo-val');
         if (!saldoEl) return;
-        saldoEl.textContent = fmtBRL(saldoAtual);
+        saldoEl.textContent = fm(saldoAtual);
         saldoEl.className = saldoAtual > banca ? 'pos' : (saldoAtual < banca ? 'neg' : '');
       });
 
-      ['cmp','ops'].forEach(function(p) {
+      group.forEach(function(p) {
         var fill = document.getElementById(p + '-meta-bar-fill');
         var label = document.getElementById(p + '-meta-bar-label');
         if (!fill || !label) return;
@@ -2786,66 +2788,106 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
         }
       });
 
-      saveMetaDebounced();
+      if (px === 'fx') saveFxMetaDebounced(); else saveMetaDebounced();
     }
-    function resetCmpMeta() {
-      showGenConfirm('Reiniciar o dia?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+    function resetCmpMeta(px) {
+      var isFx = px === 'fx';
+      showGenConfirm('Reiniciar o dia (' + (isFx ? 'Forex' : 'Win Mini \u00cdndice') + ')?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
         setLoading(true);
-        dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] })
+        dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] }, isFx ? 2 : 1)
           .then(function() { return loadCmpMetaFromCloud(); })
-          .then(function() { calcCmpMeta('cmp'); showToast('Dia reiniciado!', 'success'); })
+          .then(function() { calcCmpMeta(isFx ? 'fx' : 'cmp'); showToast('Dia reiniciado!', 'success'); })
           .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
           .finally(function() { setLoading(false); });
       });
     }
-    function exportCmpTradeDia() {
-      var records = [];
-      var totalGain = 0, totalLoss = 0;
-      var dataInp = document.getElementById('cmp-data').value;
-      var tsFinal;
-      if (dataInp) {
-        var now = new Date();
-        var parts = dataInp.split('-');
-        var dt = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10), now.getHours(), now.getMinutes(), now.getSeconds());
-        tsFinal = dt.toISOString();
-      } else {
-        tsFinal = new Date().toISOString();
+
+    /* RESULTADO DIARIO POR MES (nuvem: resultados_diarios) */
+    var RD_MESES = ['Janeiro','Fevereiro','Mar\u00e7o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var RD_DIAS = ['dom','seg','ter','qua','qui','sex','s\u00e1b'];
+    var rdVals = { win: {}, fx: {} };
+    var rdTimers = {};
+    function rdFmt(m, v) { return (m === 'fx' ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function rdPad(n) { return n < 10 ? '0' + n : '' + n; }
+    function rdSel(m) {
+      var a = document.getElementById('rd-' + m + '-ano'), me = document.getElementById('rd-' + m + '-mes');
+      if (!a || !me) return null;
+      var ano = parseInt(a.value, 10), mes = parseInt(me.value, 10);
+      if (isNaN(ano) || isNaN(mes)) return null;
+      return { ano: ano, mes: mes, dias: new Date(ano, mes, 0).getDate() };
+    }
+    function initRdSelectors() {
+      var now = new Date(), y = now.getFullYear();
+      ['win','fx'].forEach(function(m) {
+        var a = document.getElementById('rd-' + m + '-ano'), me = document.getElementById('rd-' + m + '-mes');
+        if (!a || !me) return;
+        var h = '';
+        for (var i = y - 3; i <= y + 2; i++) h += '<option value="' + i + '">' + i + '</option>';
+        a.innerHTML = h; a.value = String(y);
+        me.value = String(now.getMonth() + 1);
+        renderResultadosMes(m);
+      });
+    }
+    function changeRdPeriod(m) {
+      rdVals[m] = {};
+      renderResultadosMes(m);
+      loadResultadosMes(m);
+    }
+    function loadResultadosMes(m) {
+      var sel = rdSel(m); if (!sel) return Promise.resolve();
+      var ini = sel.ano + '-' + rdPad(sel.mes) + '-01', fim = sel.ano + '-' + rdPad(sel.mes) + '-' + rdPad(sel.dias);
+      return dbRdList(m, ini, fim).then(function(rows) {
+        var now2 = rdSel(m);
+        if (!now2 || now2.ano !== sel.ano || now2.mes !== sel.mes) return;
+        rdVals[m] = {};
+        (rows || []).forEach(function(r) { rdVals[m][r.data] = r.valor; });
+        renderResultadosMes(m);
+      }).catch(function(e) { showToast('Erro ao carregar os resultados do m\u00eas: ' + e.message, 'error'); });
+    }
+    function renderResultadosMes(m) {
+      var sel = rdSel(m), grid = document.getElementById('rd-' + m + '-grid');
+      if (!sel || !grid) return;
+      var html = '';
+      for (var d = 1; d <= sel.dias; d++) {
+        var key = sel.ano + '-' + rdPad(sel.mes) + '-' + rdPad(d);
+        var v = rdVals[m][key];
+        var vn = parseFloat(v);
+        var cls = (!isNaN(vn) && vn !== 0) ? (vn > 0 ? ' pos' : ' neg') : '';
+        var wd = RD_DIAS[new Date(sel.ano, sel.mes - 1, d).getDay()];
+        html += '<div class="rd-day"><span class="rd-day-num">' + rdPad(d) + '<small>' + wd + '</small></span>' +
+          '<input type="number" class="rd-day-inp' + cls + '" id="rd-' + m + '-d' + d + '" step="0.01" placeholder="0.00" value="' + (v != null ? v : '') + '" oninput="updResultadoDia(\'' + m + '\',' + d + ',this.value)"></div>';
       }
-      for (var i = 1; i <= 5; i++) {
-        var vg = parseFloat(document.getElementById('cmp-entry-' + i).value);
-        if (!isNaN(vg) && vg !== 0) {
-          records.push({ par:'TRADE DO DIA', dir:'compra', res:'gain', categoria:'daytrade', conta:'real', valor: Math.abs(vg), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:tsFinal });
-          totalGain += Math.abs(vg);
-        }
-        var vl = parseFloat(document.getElementById('cmp-loss-' + i).value);
-        if (!isNaN(vl) && vl !== 0) {
-          records.push({ par:'TRADE DO DIA', dir:'venda', res:'stop', categoria:'daytrade', conta:'real', valor: Math.abs(vl), moeda:'brl', nota:null, thumb:null, imagem:null, imagens:null, origem:'exportado', ts:tsFinal });
-          totalLoss += Math.abs(vl);
-        }
+      grid.innerHTML = html;
+      var info = document.getElementById('rd-' + m + '-info');
+      if (info) info.textContent = RD_MESES[sel.mes - 1] + ' de ' + sel.ano + ' \u2014 ' + sel.dias + ' dias';
+      updateResultadoTotal(m);
+    }
+    function updateResultadoTotal(m) {
+      var sel = rdSel(m), el = document.getElementById('rd-' + m + '-total');
+      if (!sel || !el) return;
+      var total = 0;
+      for (var d = 1; d <= sel.dias; d++) {
+        var v = parseFloat(rdVals[m][sel.ano + '-' + rdPad(sel.mes) + '-' + rdPad(d)]);
+        if (!isNaN(v)) total += v;
       }
-      if (!records.length) { showToast('Preencha ao menos uma entrada de Gain ou Loss.', 'error'); return; }
-      var bancaAtual = parseFloat(document.getElementById('cmp-banca').value);
-      var resultadoDia = totalGain - totalLoss;
-      var percentualDia = (!isNaN(bancaAtual) && bancaAtual > 0) ? (resultadoDia / bancaAtual) * 100 : null;
-      setLoading(true);
-      captureStatsSnapshot().then(function(before) {
-        statsSnapshotBefore = before;
-        statsSnapshotAfter = null;
-        return Promise.all(records.map(function(r) { return dbAdd(r); }));
-      })
-        .then(function() {
-          if (!isNaN(bancaAtual)) {
-            return dbBancaHistAdd(bancaAtual, resultadoDia, percentualDia, tsFinal).catch(function(e) { showToast('Aviso: hist\u00f3rico de banca n\u00e3o foi salvo (' + e.message + ')', 'error'); });
-          }
-        })
-        .then(function() {
-          showToast('Trade do dia exportado para as estat\u00edsticas!', 'success');
-          return dbMetaSet({ gains: [], losses: [] });
-        })
-        .then(function() { return loadCmpMetaFromCloud(); })
-        .then(function() { calcCmpMeta('cmp'); updateStats(); })
-        .catch(function(e) { showToast('Erro ao exportar: ' + e.message, 'error'); })
-        .finally(function() { setLoading(false); });
+      el.textContent = (total >= 0 ? '+ ' : '\u2212 ') + rdFmt(m, Math.abs(total));
+      el.className = total > 0 ? 'pos' : (total < 0 ? 'neg' : '');
+    }
+    function updResultadoDia(m, d, val) {
+      var sel = rdSel(m); if (!sel) return;
+      var key = sel.ano + '-' + rdPad(sel.mes) + '-' + rdPad(d);
+      var num = parseFloat(val);
+      var has = val !== '' && !isNaN(num);
+      if (has) rdVals[m][key] = num; else delete rdVals[m][key];
+      var inp = document.getElementById('rd-' + m + '-d' + d);
+      if (inp) inp.className = 'rd-day-inp' + ((has && num !== 0) ? (num > 0 ? ' pos' : ' neg') : '');
+      updateResultadoTotal(m);
+      var tk = m + key;
+      clearTimeout(rdTimers[tk]);
+      rdTimers[tk] = setTimeout(function() {
+        var pr = has ? dbRdUpsert(m, key, num) : dbRdDel(m, key);
+        pr.catch(function(e) { showToast('Erro ao salvar o dia: ' + e.message, 'error'); });
+      }, 600);
     }
 
     /* METAS DO MES (nuvem: metas_mes) */
@@ -2999,6 +3041,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     function refreshMetaPanel() {
       return Promise.all([loadCmpMetaFromCloud(), loadMetamesFromCloud(), loadGanhosFromCloud()]).then(function() {
         calcCmpMeta('cmp');
+        calcCmpMeta('fx');
         renderCmpMetasMes();
         renderGanhosMensais();
       });
@@ -3059,6 +3102,7 @@ create policy "acesso_publico_aporte_categorias" on aporte_categorias
     try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
     try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
     try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
+    try { initRdSelectors(); } catch(e) { console.error('resultado diario falhou:', e); }
     try { var diInit = document.getElementById('inp-data'); if (diInit) diInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
     try { var apInit = document.getElementById('aporte-data'); if (apInit) apInit.value = new Date().toISOString().slice(0,10); } catch(e) {}
     try { pickConta('real'); } catch(e) {}
