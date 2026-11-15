@@ -125,6 +125,7 @@
     .bnav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:flex; z-index:20; padding-bottom:env(safe-area-inset-bottom,0px); }
     .bnav-btn { flex:1; padding:11px 8px; border:none; background:none; color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:9px; text-transform:uppercase; letter-spacing:.8px; transition:color .15s; }
     .bnav-btn .ico { font-size:19px; } .bnav-btn.active { color:var(--blue); }
+    @media (max-width:480px) { .bnav-btn { padding:11px 2px; font-size:8px; letter-spacing:.2px; } }
     /* STATS */
     .stats-wrap { padding:14px; }
     .risk-subnav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
@@ -437,6 +438,24 @@
     .img-lightbox-close:hover { background:rgba(255,255,255,.2); }
     .carousel-img, .modal-img-box img { cursor:zoom-in; }
 
+
+    /* INSTRUCOES (editor de texto rico) */
+    .ins-toolbar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px 4px; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:8px; margin-bottom:12px; }
+    .ins-sep { width:1px; align-self:stretch; background:var(--border); margin:0 4px; }
+    .ins-lbl { font-size:9px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:0 2px 0 4px; }
+    .ins-btn { min-width:34px; height:34px; padding:0 8px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-family:var(--ui); }
+    .ins-btn:hover { border-color:var(--blue); }
+    .ins-btn.on { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
+    .ins-dot { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,.25); cursor:pointer; padding:0; }
+    .ins-dot:hover { transform:scale(1.15); }
+    .ins-hl { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); cursor:pointer; padding:0; font-size:13px; font-weight:800; color:var(--text); display:inline-flex; align-items:center; justify-content:center; }
+    .ins-hl:hover { border-color:var(--text); }
+    .ins-editor { min-height:60vh; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; font-size:15px; line-height:1.65; outline:none; word-break:break-word; }
+    .ins-editor:focus { border-color:var(--blue); }
+    .ins-editor:empty:before { content:attr(data-ph); color:var(--muted); pointer-events:none; }
+    .ins-status { font-size:11px; color:var(--muted); text-align:right; margin-top:8px; min-height:14px; }
+    .ins-status.ok { color:var(--bull); } .ins-status.err { color:var(--bear); }
+
     /* DESKTOP */
     @media (min-width: 900px) {
       .hdr { padding:12px 24px; } .hdr-nav { display:flex; }
@@ -448,6 +467,8 @@
       #tab-compromisso { overflow-y:auto; height:100%; }
       #tab-operacional { overflow-y:auto; height:100%; }
       #tab-memorias { overflow-y:auto; height:100%; }
+      #tab-instrucoes { overflow-y:auto; height:100%; }
+      #tab-instrucoes .cmp-wrap { max-width:900px; }
       #tab-operacional .cmp-wrap { max-width:1400px; }
       #tab-compromisso .cmp-wrap { max-width:900px; }
       .op-method-layout { flex-direction:row; align-items:stretch; }
@@ -563,6 +584,16 @@ alter table ganhos_mensais enable row level security;
 create policy "acesso_publico_ganhos" on ganhos_mensais
   for all using (true) with check (true);
 
+create table instrucoes (
+  id int primary key,
+  conteudo text,
+  updated_at timestamptz default now()
+);
+alter table instrucoes enable row level security;
+create policy "acesso_publico_instrucoes" on instrucoes
+  for all using (true) with check (true);
+grant all on instrucoes to anon, authenticated;
+
 create table memorias_evolucao (
   id bigserial primary key,
   ano int,
@@ -642,6 +673,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Gerenciamento de Risco</button>
       <button class="hdr-tab" data-tab="compromisso" onclick="switchTab('compromisso')">&#128591; Compromisso</button>
       <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Meu Operacional</button>
+      <button class="hdr-tab" data-tab="instrucoes" onclick="switchTab('instrucoes')">&#128221; Instru&#231;&#245;es</button>
       <button class="hdr-tab" data-tab="memorias" onclick="switchTab('memorias')">&#128220; Mem&#243;rias</button>
     </nav>
     <button class="hdr-settings" onclick="openConfig()">&#9881;</button>
@@ -1226,6 +1258,33 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       </div>
     </div>
 
+    <!-- INSTRUCOES -->
+    <div class="tab" id="tab-instrucoes">
+      <div class="cmp-wrap">
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128221; Instru&#231;&#245;es</div>
+          <p class="cmp-hint" style="margin-bottom:0;text-align:left">Escreva aqui suas regras e instru&#231;&#245;es. Selecione o texto e use os bot&#245;es para formatar. Tudo &#233; salvo automaticamente na nuvem.</p>
+        </div>
+        <div class="ins-toolbar" id="ins-toolbar">
+          <button type="button" class="ins-btn" id="ins-b" title="Negrito" style="font-weight:900" onmousedown="event.preventDefault()" onclick="insCmd(&quot;bold&quot;)">B</button>
+          <button type="button" class="ins-btn" id="ins-i" title="It&#225;lico" style="font-style:italic;font-family:Georgia,serif" onmousedown="event.preventDefault()" onclick="insCmd(&quot;italic&quot;)">I</button>
+          <button type="button" class="ins-btn" id="ins-u" title="Sublinhado" style="text-decoration:underline" onmousedown="event.preventDefault()" onclick="insCmd(&quot;underline&quot;)">U</button>
+          <span class="ins-sep"></span>
+          <span class="ins-lbl">Letra</span>
+          <button type="button" class="ins-dot" style="background:#4d9bff" title="Letra azul" onmousedown="event.preventDefault()" onclick="insColor(&quot;#4d9bff&quot;)"></button><button type="button" class="ins-dot" style="background:#ffd600" title="Letra amarelo" onmousedown="event.preventDefault()" onclick="insColor(&quot;#ffd600&quot;)"></button><button type="button" class="ins-dot" style="background:#00e676" title="Letra verde" onmousedown="event.preventDefault()" onclick="insColor(&quot;#00e676&quot;)"></button><button type="button" class="ins-dot" style="background:#ff9100" title="Letra laranja" onmousedown="event.preventDefault()" onclick="insColor(&quot;#ff9100&quot;)"></button>
+          <button type="button" class="ins-btn" title="Cor padr&#227;o da letra" style="min-width:28px;height:28px;font-size:11px" onmousedown="event.preventDefault()" onclick="insColor(&quot;#d8dae8&quot;)">A</button>
+          <span class="ins-sep"></span>
+          <span class="ins-lbl">Marca-texto</span>
+          <button type="button" class="ins-hl" style="background:rgba(77,155,255,.45)" title="Marca-texto azul" onmousedown="event.preventDefault()" onclick="insHilite(&quot;rgba(77,155,255,.45)&quot;)">A</button><button type="button" class="ins-hl" style="background:rgba(255,214,0,.45)" title="Marca-texto amarelo" onmousedown="event.preventDefault()" onclick="insHilite(&quot;rgba(255,214,0,.45)&quot;)">A</button><button type="button" class="ins-hl" style="background:rgba(0,230,118,.4)" title="Marca-texto verde" onmousedown="event.preventDefault()" onclick="insHilite(&quot;rgba(0,230,118,.4)&quot;)">A</button><button type="button" class="ins-hl" style="background:rgba(255,145,0,.45)" title="Marca-texto laranja" onmousedown="event.preventDefault()" onclick="insHilite(&quot;rgba(255,145,0,.45)&quot;)">A</button>
+          <button type="button" class="ins-btn" title="Remover marca-texto" style="min-width:30px;height:30px" onmousedown="event.preventDefault()" onclick="insHilite(&quot;transparent&quot;)">&#10005;</button>
+          <span class="ins-sep"></span>
+          <button type="button" class="ins-btn" title="Limpar formata&#231;&#227;o" style="font-size:12px" onmousedown="event.preventDefault()" onclick="insClear()">Limpar</button>
+        </div>
+        <div class="ins-editor" id="ins-editor" contenteditable="true" data-ph="Escreva suas instru&#231;&#245;es aqui..." spellcheck="true"></div>
+        <div class="ins-status" id="ins-status"></div>
+      </div>
+    </div>
+
     <!-- MEMORIAS / EVOLUCAO -->
     <div class="tab" id="tab-memorias">
       <div class="cmp-wrap">
@@ -1244,6 +1303,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Risco</button>
     <button class="bnav-btn" data-tab="compromisso" onclick="switchTab('compromisso')"><span class="ico">&#128591;</span>Compromisso</button>
     <button class="bnav-btn" data-tab="operacional" onclick="switchTab('operacional')"><span class="ico">&#129517;</span>Operacional</button>
+    <button class="bnav-btn" data-tab="instrucoes" onclick="switchTab('instrucoes')"><span class="ico">&#128221;</span>Instru&#231;&#245;es</button>
     <button class="bnav-btn" data-tab="memorias" onclick="switchTab('memorias')"><span class="ico">&#128220;</span>Mem&#243;rias</button>
   </nav>
 
@@ -2100,6 +2160,8 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       if (tab === 'compromisso') renderCompromisso();
       if (tab === 'operacional') loadOperacional();
       if (tab === 'memorias') loadMemorias();
+      if (tab === 'instrucoes') loadInstrucoes();
+      else if (typeof insFlush === 'function') insFlush();
     }
 
     /* SUPABASE HELPERS - SINCRONIZACAO NA NUVEM */
@@ -2470,6 +2532,124 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
           .finally(function() { setLoading(false); });
       }
     });
+
+/* INSTRUCOES - editor de texto rico (nuvem: instrucoes, linha id=1) */
+    var insDirty = false, insLoaded = false, insSavedRange = null;
+    var INS_ALLOWED = { B:1, I:1, U:1, STRONG:1, EM:1, SPAN:1, DIV:1, P:1, BR:1, FONT:1, UL:1, OL:1, LI:1 };
+    function insCleanStyle(st) {
+      var out = [];
+      String(st || '').split(';').forEach(function(d) {
+        var i = d.indexOf(':'); if (i < 0) return;
+        var k = d.slice(0, i).trim().toLowerCase(), v = d.slice(i + 1).trim();
+        if (!/^(#[0-9a-f]{3,8}|rgba?\([0-9., %]+\)|transparent|[a-z]+)$/i.test(v)) return;
+        if (k === 'color' || k === 'background-color') out.push(k + ':' + v);
+        else if (k === 'font-weight' && /^(bold|700|800|900)$/.test(v)) out.push(k + ':' + v);
+        else if (k === 'font-style' && v === 'italic') out.push(k + ':' + v);
+        else if (k === 'text-decoration' && /underline/.test(v)) out.push(k + ':underline');
+      });
+      return out.join(';');
+    }
+    function insSanitizeNode(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function(ch) {
+        if (ch.nodeType === 3) return;
+        if (ch.nodeType !== 1 || !INS_ALLOWED[ch.tagName]) { ch.parentNode.removeChild(ch); return; }
+        var st = ch.getAttribute('style'), col = ch.getAttribute('color');
+        Array.prototype.slice.call(ch.attributes).forEach(function(a) { ch.removeAttribute(a.name); });
+        var clean = insCleanStyle(st);
+        if (clean) ch.setAttribute('style', clean);
+        if (ch.tagName === 'FONT' && col && /^(#[0-9a-f]{3,8}|[a-z]+)$/i.test(col)) ch.setAttribute('color', col);
+        insSanitizeNode(ch);
+      });
+    }
+    function insSanitize(html) {
+      var doc = new DOMParser().parseFromString('<body>' + (html || '') + '</body>', 'text/html');
+      insSanitizeNode(doc.body);
+      return doc.body.innerHTML;
+    }
+    function insStatus(msg, cls) {
+      var el = document.getElementById('ins-status'); if (!el) return;
+      el.textContent = msg; el.className = 'ins-status ' + (cls || '');
+    }
+    function dbInsGet() { return supaReq('instrucoes?id=eq.1&select=conteudo'); }
+    function dbInsSet(html) {
+      return supaReq('instrucoes?on_conflict=id', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ id: 1, conteudo: html, updated_at: new Date().toISOString() }]) });
+    }
+    function loadInstrucoes() {
+      var ed = document.getElementById('ins-editor');
+      if (insDirty) return; /* ha alteracao ainda nao salva: nao sobrescrever */
+      setLoading(true);
+      dbInsGet().then(function(rows) {
+        if (insDirty) return;
+        ed.innerHTML = insSanitize((rows && rows[0] && rows[0].conteudo) || '');
+        insLoaded = true;
+        insStatus('');
+      }).catch(function(e) { insStatus('Erro ao carregar: ' + e.message, 'err'); showToast('Erro ao carregar instruções: ' + e.message, 'error'); })
+        .finally(function() { setLoading(false); });
+    }
+    function insSaveNow() {
+      if (!insDirty) return Promise.resolve();
+      if (!insLoaded) { insStatus('Aguarde o carregamento antes de salvar...', 'err'); return Promise.resolve(); }
+      var html = insSanitize(document.getElementById('ins-editor').innerHTML);
+      insDirty = false;
+      insStatus('Salvando...');
+      return dbInsSet(html).then(function() {
+        if (!insDirty) insStatus('Salvo na nuvem ✓', 'ok');
+      }).catch(function(e) { insDirty = true; insStatus('Erro ao salvar: ' + e.message, 'err'); showToast('Erro ao salvar instruções: ' + e.message, 'error'); });
+    }
+    var insSaveDeb = debounce(insSaveNow, 800);
+    function insFlush() { if (insDirty) insSaveNow(); }
+    function insMarkDirty() { insDirty = true; insStatus('Alterado...'); insSaveDeb(); }
+    function insSaveRange() {
+      var sel = window.getSelection(), ed = document.getElementById('ins-editor');
+      if (sel && sel.rangeCount && ed.contains(sel.getRangeAt(0).commonAncestorContainer)) insSavedRange = sel.getRangeAt(0).cloneRange();
+    }
+    function insRestore() {
+      var ed = document.getElementById('ins-editor');
+      ed.focus();
+      var sel = window.getSelection();
+      if (insSavedRange && !(sel.rangeCount && ed.contains(sel.getRangeAt(0).commonAncestorContainer))) {
+        sel.removeAllRanges(); sel.addRange(insSavedRange);
+      }
+    }
+    function insExec(cmd, val) {
+      insRestore();
+      try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+      document.execCommand(cmd, false, val || null);
+      insSaveRange(); insMarkDirty(); insUpdateBtns();
+    }
+    function insCmd(c) { insExec(c); }
+    function insColor(c) { insExec('foreColor', c); }
+    function insHilite(c) { insExec('hiliteColor', c); }
+    function insClear() {
+      insRestore();
+      document.execCommand('removeFormat', false, null);
+      document.execCommand('hiliteColor', false, 'transparent');
+      insSaveRange(); insMarkDirty(); insUpdateBtns();
+    }
+    function insUpdateBtns() {
+      [['ins-b', 'bold'], ['ins-i', 'italic'], ['ins-u', 'underline']].forEach(function(p) {
+        var b = document.getElementById(p[0]), on = false;
+        try { on = document.queryCommandState(p[1]); } catch (e) {}
+        if (b) b.classList.toggle('on', !!on);
+      });
+    }
+    function initInstrucoes() {
+      var ed = document.getElementById('ins-editor');
+      if (!ed) return;
+      ed.addEventListener('input', insMarkDirty);
+      ed.addEventListener('blur', insFlush);
+      ed.addEventListener('paste', function(ev) {
+        ev.preventDefault();
+        var t = (ev.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, t);
+      });
+      document.addEventListener('selectionchange', function() {
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount && ed.contains(sel.getRangeAt(0).commonAncestorContainer)) { insSaveRange(); insUpdateBtns(); }
+      });
+      document.addEventListener('visibilitychange', function() { if (document.hidden) insFlush(); });
+      window.addEventListener('pagehide', insFlush);
+    }
 
     /* MEMORIAS / EVOLUCAO NO TRADE (nuvem: memorias_evolucao) */
     var memEntriesCache = [];
@@ -3267,6 +3447,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
 
     /* INIT */
     try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
+    try { initInstrucoes(); } catch(e) { console.error('instrucoes falhou:', e); }
     try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
     try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
     try { initRdSelectors(); } catch(e) { console.error('resultado diario falhou:', e); }
