@@ -30,6 +30,8 @@
     .hdr-nav { display:none; gap:4px; align-items:center; }
     .hdr-tab { padding:7px 14px; border:none; border-radius:8px; background:transparent; color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:.6px; transition:all .15s; }
     .hdr-tab.active { background:var(--blue-dim); color:var(--blue); }
+    .hdr-tab { white-space:nowrap; }
+    @media (min-width:900px) and (max-width:1500px) { .hdr-tab { padding:7px 8px; font-size:10px; letter-spacing:.2px; } .hdr-nav { gap:2px; } }
     .hdr-settings { width:32px; height:32px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
     .hdr-settings:hover { border-color:var(--blue); color:var(--blue); }
     .main { flex:1; overflow-y:auto; padding-bottom:72px; min-height:0; }
@@ -456,6 +458,45 @@
     .ins-status { font-size:11px; color:var(--muted); text-align:right; margin-top:8px; min-height:14px; }
     .ins-status.ok { color:var(--bull); } .ins-status.err { color:var(--bear); }
 
+
+    /* CALCULADORA COMPARATIVA */
+    .calc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+    .calc-lbl { display:block; font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+    .calc-in { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:9px; padding:11px 12px; font-size:16px; font-family:var(--mono); outline:none; }
+    .calc-in:focus { border-color:var(--blue); }
+    .calc-dir { display:flex; gap:8px; }
+    .calc-dir button { flex:1; padding:11px 6px; border-radius:9px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); font-size:12px; font-weight:800; cursor:pointer; }
+    .calc-dir .fav.on { background:var(--bull-dim); border-color:var(--bull); color:var(--bull); }
+    .calc-dir .con.on { background:var(--bear-dim); border-color:var(--bear); color:var(--bear); }
+    .calc-quick { display:flex; flex-wrap:wrap; gap:8px; }
+    .calc-chip { padding:9px 14px; border-radius:999px; border:1px solid var(--blue); background:var(--blue-dim); color:var(--blue); font-size:13px; font-weight:800; cursor:pointer; font-family:var(--mono); }
+    .calc-chip:hover { background:var(--blue); color:#fff; }
+    .calc-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .calc-btn { display:flex; align-items:center; justify-content:center; line-height:1.2; padding:13px 14px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); }
+    .calc-btn.prim { flex:2 1 160px; background:var(--blue); border-color:var(--blue); color:#fff; }
+    .calc-btn.sec { flex:1 1 110px; }
+    .calc-btn:hover { opacity:.88; }
+    .calc-msg { font-size:12px; font-weight:700; color:var(--bear); min-height:16px; margin-top:10px; }
+    .calc-panels { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+    .calc-panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .calc-panel h3 { font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--blue); margin-bottom:8px; }
+    .calc-row { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+    .calc-row:last-child { border-bottom:none; }
+    .calc-row > span:first-child { color:var(--muted); }
+    .calc-row > span:last-child { font-family:var(--mono); font-weight:700; text-align:right; }
+    .calc-row.big > span:last-child { font-size:20px; font-weight:800; white-space:nowrap; }
+    .calc-pos { color:var(--bull); } .calc-neg { color:var(--bear); } .calc-ref { color:var(--blue); }
+    .calc-final { background:var(--surface); border:1px solid var(--blue); border-radius:14px; padding:16px; margin-bottom:14px; }
+    .calc-final h3 { font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--blue); margin-bottom:8px; }
+    .calc-verdict { margin-top:10px; padding:11px 12px; border-radius:10px; background:var(--blue-dim); color:var(--blue); font-size:13px; font-weight:800; text-align:center; }
+    .calc-note { font-size:11px; color:var(--muted); margin-top:10px; line-height:1.5; }
+    .calc-hist-wrap { overflow-x:auto; }
+    .calc-hist { width:100%; border-collapse:collapse; font-size:12px; font-family:var(--mono); white-space:nowrap; }
+    .calc-hist th { text-align:right; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; padding:6px 8px; border-bottom:1px solid var(--border); font-family:var(--ui); }
+    .calc-hist td { text-align:right; padding:7px 8px; border-bottom:1px solid var(--border); }
+    .calc-hist th:first-child, .calc-hist td:first-child { text-align:left; }
+    @media (max-width:600px) { .calc-panels { grid-template-columns:1fr; } }
+
     /* DESKTOP */
     @media (min-width: 900px) {
       .hdr { padding:12px 24px; } .hdr-nav { display:flex; }
@@ -468,6 +509,8 @@
       #tab-operacional { overflow-y:auto; height:100%; }
       #tab-memorias { overflow-y:auto; height:100%; }
       #tab-instrucoes { overflow-y:auto; height:100%; }
+      #tab-calc { overflow-y:auto; height:100%; }
+      #tab-calc .cmp-wrap { max-width:1000px; }
       #tab-instrucoes .cmp-wrap { max-width:900px; }
       #tab-operacional .cmp-wrap { max-width:1400px; }
       #tab-compromisso .cmp-wrap { max-width:900px; }
@@ -671,6 +714,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     <nav class="hdr-nav">
       <button class="hdr-tab active" data-tab="ops" onclick="switchTab('ops')">&#128203; Di&#225;rio de Opera&#231;&#245;es</button>
       <button class="hdr-tab" data-tab="stats" onclick="switchTab('stats')">&#128202; Gerenciamento de Risco</button>
+      <button class="hdr-tab" data-tab="calc" onclick="switchTab('calc')">&#129518; Calculadora</button>
       <button class="hdr-tab" data-tab="compromisso" onclick="switchTab('compromisso')">&#128591; Compromisso</button>
       <button class="hdr-tab" data-tab="operacional" onclick="switchTab('operacional')">&#129517; Meu Operacional</button>
       <button class="hdr-tab" data-tab="instrucoes" onclick="switchTab('instrucoes')">&#128221; Instru&#231;&#245;es</button>
@@ -1258,6 +1302,80 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       </div>
     </div>
 
+    <!-- CALCULADORA COMPARATIVA -->
+    <div class="tab" id="tab-calc">
+      <div class="cmp-wrap">
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#129518; Calculadora Comparativa: Mini &#205;ndice &#215; Nasdaq</div>
+          <p class="cmp-hint" style="margin-bottom:0;text-align:left">Compara o <strong>mesmo n&#250;mero de pontos</strong> no Mini &#205;ndice (WIN) e no Nasdaq 100 (NAS100, CFD Pepperstone via TradingView). Resultado bruto, sem spread, comiss&#227;o, swap ou impostos.</p>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">Nova simula&#231;&#227;o</div>
+          <div class="calc-grid">
+            <div>
+              <label class="calc-lbl" for="calc-usd">Cota&#231;&#227;o do d&#243;lar (R$) *</label>
+              <input class="calc-in" id="calc-usd" type="text" inputmode="decimal" autocomplete="off" placeholder="digite a cota&#231;&#227;o atual">
+            </div>
+            <div>
+              <label class="calc-lbl" for="calc-pts">Pontos que o mercado andou *</label>
+              <input class="calc-in" id="calc-pts" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 100">
+            </div>
+            <div>
+              <span class="calc-lbl">Dire&#231;&#227;o do movimento</span>
+              <div class="calc-dir">
+                <button type="button" class="fav on" id="calc-dir-fav" onclick="calcSetDir(1)">&#9650; A favor (lucro)</button>
+                <button type="button" class="con" id="calc-dir-con" onclick="calcSetDir(-1)">&#9660; Contra (preju&#237;zo)</button>
+              </div>
+            </div>
+          </div>
+          <div class="calc-lbl" style="margin-top:16px">Atalhos de simula&#231;&#227;o (pontos)</div>
+          <div class="calc-quick" id="calc-quick">
+            <button type="button" class="calc-chip" onclick="calcQuick(10)">10</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(20)">20</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(50)">50</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(100)">100</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(150)">150</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(200)">200</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(300)">300</button>
+            <button type="button" class="calc-chip" onclick="calcQuick(500)">500</button>
+          </div>
+          <div class="calc-actions" style="margin-top:16px">
+            <button type="button" class="calc-btn prim" onclick="calcRun(true)">Calcular</button>
+            <button type="button" class="calc-btn sec" onclick="calcLimpar()">Limpar</button>
+            <button type="button" class="calc-btn sec" onclick="calcNova()">Nova simula&#231;&#227;o</button>
+          </div>
+          <div class="calc-msg" id="calc-msg"></div>
+        </div>
+
+        <div id="calc-result"></div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#9881;&#65039; Configura&#231;&#245;es</div>
+          <div class="calc-grid">
+            <div><label class="calc-lbl" for="calc-wc">WIN: contratos</label><input class="calc-in" id="calc-wc" type="text" inputmode="decimal" value="1"></div>
+            <div><label class="calc-lbl" for="calc-wv">WIN: valor por ponto (R$)</label><input class="calc-in" id="calc-wv" type="text" inputmode="decimal" value="0,20"></div>
+            <div><label class="calc-lbl" for="calc-nl">NAS100: volume (lote)</label><input class="calc-in" id="calc-nl" type="text" inputmode="decimal" value="0,10"></div>
+            <div><label class="calc-lbl" for="calc-nv">NAS100: valor por ponto (US$)</label><input class="calc-in" id="calc-nv" type="text" inputmode="decimal" value="0,10"></div>
+            <div><label class="calc-lbl" for="calc-wcost">WIN: custos (R$)</label><input class="calc-in" id="calc-wcost" type="text" inputmode="decimal" value="0"></div>
+            <div><label class="calc-lbl" for="calc-ncost">NAS100: custos (US$)</label><input class="calc-in" id="calc-ncost" type="text" inputmode="decimal" value="0"></div>
+          </div>
+          <p class="calc-note">O valor por ponto do NAS100 vale para o volume informado (padr&#227;o: US$ 0,10 por ponto com 0,10 lote na Pepperstone). Os multiplicadores n&#227;o s&#227;o universais: se mudar o volume, ajuste tamb&#233;m o valor por ponto conforme a especifica&#231;&#227;o do contrato da sua conta. Os campos de custos (spread, comiss&#227;o, swap, impostos) ficam em zero e s&#243; geram o resultado l&#237;quido se voc&#234; preencher.</p>
+          <div class="calc-actions" style="margin-top:12px">
+            <button type="button" class="calc-btn sec" onclick="calcCfgReset()">Restaurar padr&#227;o</button>
+          </div>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128344; Hist&#243;rico da sess&#227;o</div>
+          <div id="calc-hist"></div>
+          <div class="calc-actions" style="margin-top:12px">
+            <button type="button" class="calc-btn sec" onclick="calcHistClear()">Limpar hist&#243;rico</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- INSTRUCOES -->
     <div class="tab" id="tab-instrucoes">
       <div class="cmp-wrap">
@@ -1301,6 +1419,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
   <nav class="bnav">
     <button class="bnav-btn active" data-tab="ops" onclick="switchTab('ops')"><span class="ico">&#128203;</span>Di&#225;rio</button>
     <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')"><span class="ico">&#128202;</span>Risco</button>
+    <button class="bnav-btn" data-tab="calc" onclick="switchTab('calc')"><span class="ico">&#129518;</span>Calc.</button>
     <button class="bnav-btn" data-tab="compromisso" onclick="switchTab('compromisso')"><span class="ico">&#128591;</span>Compromisso</button>
     <button class="bnav-btn" data-tab="operacional" onclick="switchTab('operacional')"><span class="ico">&#129517;</span>Operacional</button>
     <button class="bnav-btn" data-tab="instrucoes" onclick="switchTab('instrucoes')"><span class="ico">&#128221;</span>Instru&#231;&#245;es</button>
@@ -2533,7 +2652,177 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       }
     });
 
-/* INSTRUCOES - editor de texto rico (nuvem: instrucoes, linha id=1) */
+/* CALCULADORA COMPARATIVA (Mini Indice x Nasdaq) - calculos locais, historico so da sessao */
+    var calcDir = 1, calcShown = false, calcHist = [];
+    var CALC_CFG_IDS = ['calc-wc', 'calc-wv', 'calc-nl', 'calc-nv', 'calc-wcost', 'calc-ncost'];
+    var CALC_CFG_DEF = ['1', '0,20', '0,10', '0,10', '0', '0'];
+    function calcNum(id) {
+      var v = String(document.getElementById(id).value || '').trim().replace(/\s/g, '');
+      if (!v) return NaN;
+      if (v.indexOf(',') > -1) v = v.replace(/\./g, '').replace(',', '.');
+      var n = Number(v);
+      return isFinite(n) ? n : NaN;
+    }
+    function calcFmt(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function calcPlain(v, d) { return v.toLocaleString('pt-BR', { maximumFractionDigits: d == null ? 6 : d }); }
+    function calcMoney(v, cur) {
+      var s = calcFmt(Math.abs(v));
+      return ((v < 0 && s !== '0,00') ? '-' : '') + cur + ' ' + s;
+    }
+    function calcCls(v) {
+      var s = calcFmt(Math.abs(v));
+      if (s === '0,00') return 'calc-ref';
+      return v > 0 ? 'calc-pos' : 'calc-neg';
+    }
+    function calcMsg(t) { document.getElementById('calc-msg').textContent = t || ''; }
+    function calcSetDir(d) {
+      calcDir = d;
+      document.getElementById('calc-dir-fav').classList.toggle('on', d === 1);
+      document.getElementById('calc-dir-con').classList.toggle('on', d === -1);
+      if (calcShown) calcRun(false);
+    }
+    function calcQuick(n) {
+      document.getElementById('calc-pts').value = String(n);
+      calcRun(true);
+    }
+    function calcCfgSave() {
+      try { localStorage.setItem('jpf_calc_cfg', JSON.stringify(CALC_CFG_IDS.map(function(id) { return document.getElementById(id).value; }))); } catch (e) {}
+    }
+    function calcCfgReset() {
+      CALC_CFG_IDS.forEach(function(id, i) { document.getElementById(id).value = CALC_CFG_DEF[i]; });
+      calcCfgSave(); if (calcShown) calcRun(false);
+    }
+    function calcLimpar() {
+      document.getElementById('calc-pts').value = '';
+      document.getElementById('calc-result').innerHTML = '';
+      calcShown = false; calcMsg('');
+    }
+    function calcNova() {
+      document.getElementById('calc-usd').value = '';
+      calcSetDirSilent(1);
+      calcLimpar();
+      document.getElementById('calc-usd').focus();
+    }
+    function calcSetDirSilent(d) {
+      calcDir = d;
+      document.getElementById('calc-dir-fav').classList.toggle('on', d === 1);
+      document.getElementById('calc-dir-con').classList.toggle('on', d === -1);
+    }
+    function calcCompute() {
+      var usd = calcNum('calc-usd'), pts = calcNum('calc-pts');
+      var wc = calcNum('calc-wc'), wv = calcNum('calc-wv'), nl = calcNum('calc-nl'), nv = calcNum('calc-nv');
+      var wcost = calcNum('calc-wcost'), ncost = calcNum('calc-ncost');
+      if (isNaN(wcost)) wcost = 0; if (isNaN(ncost)) ncost = 0;
+      if (isNaN(usd) || usd <= 0) return { err: 'Informe a cota\u00e7\u00e3o atual do d\u00f3lar (obrigat\u00f3rio).' };
+      if (isNaN(pts) || pts <= 0) return { err: 'Informe a quantidade de pontos (maior que zero).' };
+      if (isNaN(wc) || wc <= 0 || isNaN(wv) || wv <= 0) return { err: 'Configura\u00e7\u00f5es do Mini \u00cdndice inv\u00e1lidas (contratos e valor por ponto).' };
+      if (isNaN(nl) || nl <= 0 || isNaN(nv) || nv <= 0) return { err: 'Configura\u00e7\u00f5es da Nasdaq inv\u00e1lidas (volume e valor por ponto).' };
+      if (wcost < 0 || ncost < 0) return { err: 'Os custos n\u00e3o podem ser negativos.' };
+      var sg = calcDir;
+      var win = sg * pts * wv * wc;
+      var nasUsd = sg * pts * nv;
+      var nasBrl = nasUsd * usd;
+      return { usd: usd, pts: pts, sg: sg, wc: wc, wv: wv, nl: nl, nv: nv, wcost: wcost, ncost: ncost,
+        win: win, nasUsd: nasUsd, nasBrl: nasBrl, diff: nasBrl - win,
+        winNet: win - wcost, nasNetBrl: nasBrl - ncost * usd };
+    }
+    function calcRow(l, v, cls, big) { return '<div class="calc-row' + (big ? ' big' : '') + '"><span>' + l + '</span><span class="' + (cls || '') + '">' + v + '</span></div>'; }
+    function calcVerdict(r, a, b) {
+      /* a = WIN em R$, b = Nasdaq em R$ */
+      var d = b - a;
+      if (Math.abs(d) < 1e-9) return 'Resultados equivalentes nos dois mercados.';
+      var nasMaior = Math.abs(b) > Math.abs(a);
+      var termo = r.sg === 1 ? 'Maior lucro' : 'Maior preju\u00edzo';
+      return termo + ': ' + (nasMaior ? 'Nasdaq' : 'Mini \u00cdndice');
+    }
+    function calcRender(r) {
+      var ps = (r.sg === 1 ? '+' : '-') + calcPlain(r.pts);
+      var win = '<div class="calc-panel"><h3>Mini \u00cdndice (WIN)</h3>' +
+        calcRow('Quantidade de contratos', calcPlain(r.wc), 'calc-ref') +
+        calcRow('Movimento em pontos', ps, 'calc-ref') +
+        calcRow('Valor por ponto', 'R$ ' + calcFmt(r.wv), 'calc-ref') +
+        calcRow(r.sg === 1 ? 'Lucro em reais' : 'Preju\u00edzo em reais', calcMoney(r.win, 'R$'), calcCls(r.win), true) + '</div>';
+      var nas = '<div class="calc-panel"><h3>Nasdaq (NAS100)</h3>' +
+        calcRow('Volume negociado', r.nl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 6 }) + ' lote', 'calc-ref') +
+        calcRow('Movimento em pontos', ps, 'calc-ref') +
+        calcRow('Valor por ponto', 'US$ ' + calcFmt(r.nv), 'calc-ref') +
+        calcRow(r.sg === 1 ? 'Lucro em d\u00f3lar' : 'Preju\u00edzo em d\u00f3lar', calcMoney(r.nasUsd, 'US$'), calcCls(r.nasUsd), true) +
+        calcRow('Cota\u00e7\u00e3o do d\u00f3lar utilizada', 'R$ ' + calcPlain(r.usd), 'calc-ref') +
+        calcRow('Convers\u00e3o em reais', calcMoney(r.nasBrl, 'R$'), calcCls(r.nasBrl), true) + '</div>';
+      var a = Math.abs(r.win), b = Math.abs(r.nasBrl), razao = '\u2014';
+      if (a > 0 && b > 0) {
+        if (Math.abs(a - b) < 1e-9) razao = 'Iguais (1,00\u00d7)';
+        else if (b > a) razao = 'Nasdaq \u00e9 ' + calcFmt(b / a) + '\u00d7 maior que o Mini \u00cdndice';
+        else razao = 'Mini \u00cdndice \u00e9 ' + calcFmt(a / b) + '\u00d7 maior que a Nasdaq';
+      }
+      var d = r.diff;
+      var difTxt = Math.abs(d) < 1e-9 ? 'R$ 0,00' : 'R$ ' + calcFmt(Math.abs(d)) + '<small style="display:block;font-size:11px;font-weight:700">' + (d > 0 ? 'Nasdaq a mais' : 'Nasdaq a menos') + '</small>';
+      var fin = '<div class="calc-final"><h3>Compara\u00e7\u00e3o final</h3>' +
+        calcRow('Mini \u00cdndice em reais', calcMoney(r.win, 'R$'), calcCls(r.win)) +
+        calcRow('Nasdaq em d\u00f3lar', calcMoney(r.nasUsd, 'US$'), calcCls(r.nasUsd)) +
+        calcRow('Nasdaq convertida em reais', calcMoney(r.nasBrl, 'R$'), calcCls(r.nasBrl)) +
+        calcRow('Diferen\u00e7a financeira entre os mercados', difTxt, 'calc-ref', true) +
+        calcRow('Propor\u00e7\u00e3o', razao, 'calc-ref') +
+        '<div class="calc-verdict">' + calcVerdict(r, r.win, r.nasBrl) + '</div>';
+      if (r.wcost > 0 || r.ncost > 0) {
+        var dn = r.nasNetBrl - r.winNet;
+        fin += '<div class="calc-lbl" style="margin-top:14px">Resultado l\u00edquido (ap\u00f3s os custos informados)</div>' +
+          calcRow('Mini \u00cdndice l\u00edquido', calcMoney(r.winNet, 'R$'), calcCls(r.winNet)) +
+          calcRow('Nasdaq l\u00edquida em reais', calcMoney(r.nasNetBrl, 'R$'), calcCls(r.nasNetBrl)) +
+          calcRow('Diferen\u00e7a l\u00edquida (Nasdaq \u2212 Mini)', calcMoney(dn, 'R$'), 'calc-ref');
+      } else {
+        fin += '<p class="calc-note">Resultado bruto: n\u00e3o inclui spread, comiss\u00e3o, swap nem impostos (campos de custos nas configura\u00e7\u00f5es).</p>';
+      }
+      fin += '</div>';
+      document.getElementById('calc-result').innerHTML = '<div class="calc-panels">' + win + nas + '</div>' + fin;
+    }
+    function calcRun(log) {
+      var r = calcCompute();
+      if (r.err) {
+        calcMsg(r.err); calcShown = false;
+        document.getElementById('calc-result').innerHTML = '';
+        return;
+      }
+      calcMsg(''); calcShown = true;
+      calcRender(r);
+      if (log) {
+        var d = new Date();
+        calcHist.unshift({ h: d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), pts: r.pts, sg: r.sg, usd: r.usd, win: r.win, nasUsd: r.nasUsd, nasBrl: r.nasBrl, diff: r.diff });
+        calcHistSave(); calcHistRender();
+      }
+    }
+    function calcHistSave() { try { sessionStorage.setItem('jpf_calc_hist', JSON.stringify(calcHist.slice(0, 200))); } catch (e) {} }
+    function calcHistClear() { calcHist = []; calcHistSave(); calcHistRender(); }
+    function calcHistRender() {
+      var el = document.getElementById('calc-hist');
+      if (!calcHist.length) { el.innerHTML = '<p class="cmp-hint" style="margin:0">Nenhuma simula\u00e7\u00e3o ainda. Cada c\u00e1lculo fica registrado aqui durante a sess\u00e3o.</p>'; return; }
+      var h = '<div class="calc-hist-wrap"><table class="calc-hist"><thead><tr><th>Hora</th><th>Pontos</th><th>D\u00f3lar</th><th>Mini (R$)</th><th>Nasdaq (US$)</th><th>Nasdaq (R$)</th><th>Diferen\u00e7a (R$)</th></tr></thead><tbody>';
+      calcHist.forEach(function(x) {
+        h += '<tr><td>' + x.h + '</td><td class="' + (x.sg === 1 ? 'calc-pos' : 'calc-neg') + '">' + (x.sg === 1 ? '+' : '-') + calcPlain(x.pts) + '</td><td class="calc-ref">' + calcPlain(x.usd) + '</td>' +
+          '<td class="' + calcCls(x.win) + '">' + calcMoney(x.win, 'R$') + '</td><td class="' + calcCls(x.nasUsd) + '">' + calcMoney(x.nasUsd, 'US$') + '</td>' +
+          '<td class="' + calcCls(x.nasBrl) + '">' + calcMoney(x.nasBrl, 'R$') + '</td><td class="calc-ref">' + calcFmt(Math.abs(x.diff)) + '</td></tr>';
+      });
+      el.innerHTML = h + '</tbody></table></div>';
+    }
+    function initCalc() {
+      var tab = document.getElementById('tab-calc');
+      if (!tab) return;
+      try {
+        var cfg = JSON.parse(localStorage.getItem('jpf_calc_cfg') || 'null');
+        if (cfg && cfg.length === CALC_CFG_IDS.length) CALC_CFG_IDS.forEach(function(id, i) { if (cfg[i] != null) document.getElementById(id).value = cfg[i]; });
+      } catch (e) {}
+      try { calcHist = JSON.parse(sessionStorage.getItem('jpf_calc_hist') || '[]') || []; } catch (e) { calcHist = []; }
+      tab.addEventListener('input', function(ev) {
+        if (CALC_CFG_IDS.indexOf(ev.target.id) > -1) calcCfgSave();
+        if (calcShown && ev.target.tagName === 'INPUT') calcRun(false);
+      });
+      tab.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); calcRun(true); }
+      });
+      calcHistRender();
+    }
+
+    /* INSTRUCOES - editor de texto rico (nuvem: instrucoes, linha id=1) */
     var insDirty = false, insLoaded = false, insSavedRange = null;
     var INS_ALLOWED = { B:1, I:1, U:1, STRONG:1, EM:1, SPAN:1, DIV:1, P:1, BR:1, FONT:1, UL:1, OL:1, LI:1 };
     function insCleanStyle(st) {
@@ -3448,6 +3737,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     /* INIT */
     try { setupPWA(); } catch(e) { console.error('setupPWA falhou:', e); }
     try { initInstrucoes(); } catch(e) { console.error('instrucoes falhou:', e); }
+    try { initCalc(); } catch(e) { console.error('calculadora falhou:', e); }
     try { renderFormImages(); } catch(e) { console.error('renderFormImages falhou:', e); }
     try { renderCmpEntriesGrid(); } catch(e) { console.error('grid de metas falhou:', e); }
     try { initRdSelectors(); } catch(e) { console.error('resultado diario falhou:', e); }
