@@ -319,6 +319,7 @@
     .cmp-reset-btn { width:100%; padding:11px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:9px; font-size:12px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:.4px; }
     .cmp-reset-btn:hover { border-color:var(--bear); color:var(--bear); }
     /* META E LIMITE DO DIA */
+    .cmp-sim-tag { color:#ffb300; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
     .cmp-real-tag { color:var(--bull); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
     .cmp-meta-inputs-row { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
     .cmp-meta-field label { margin-bottom:5px; }
@@ -817,6 +818,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
 
         <div class="risk-subnav">
           <button class="risk-subtab active" data-sec="conta" onclick="switchRiskSub('conta')">&#128994; Opera&#231;&#245;es na conta real</button>
+          <button class="risk-subtab" data-sec="sim" onclick="switchRiskSub('sim')">&#129514; Opera&#231;&#245;es na conta de simula&#231;&#227;o</button>
           <button class="risk-subtab" data-sec="metas" onclick="switchRiskSub('metas')">&#128176; Metas do M&#234;s</button>
           <button class="risk-subtab" data-sec="ganhos" onclick="switchRiskSub('ganhos')">&#128197; Ganhos por M&#234;s</button>
           <button class="risk-subtab" data-sec="aportes" onclick="switchRiskSub('aportes')">&#128181; Aportes de Capital</button>
@@ -987,6 +989,177 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
               <strong id="rd-fx-pct-acum">&#8212;</strong>
             </div>
             <div class="rd-yield-hint" id="rd-fx-pct-hint">Preencha a Banca inicial no painel acima para ver quanto voc&#234; ganhou ou perdeu em %.</div>
+          </div>
+        </div>
+
+        </div>
+
+        <div class="risk-sec" id="risk-sec-sim">
+
+
+        <div class="cmp-card" style="margin-top:0">
+          <div class="cmp-sim-tag">&#129514; Simula&#231;&#227;o &#8212; Opera&#231;&#245;es no Mini &#205;ndice (R$)</div>
+          <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="sops-data" style="text-transform:none" oninput="calcCmpMeta('sops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca inicial (valor aportado)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sops-banca-inicial" placeholder="0.00" step="0.01" min="0" oninput="onBancaInicialInput('sops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca do Dia</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sops-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('sops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Stop Loss (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sops-stop-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('sops')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Meta Gain (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sops-gain-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('sops')">
+            </div>
+          </div>
+          <div class="cmp-calc-row">
+            <div class="cmp-calc-box bear"><span>Limite de Perda</span><strong id="sops-stop-val">R$ 0,00</strong></div>
+            <div class="cmp-calc-box bull"><span>Meta de Ganho</span><strong id="sops-gain-val">R$ 0,00</strong></div>
+          </div>
+          <div class="cmp-sec-title" style="margin-top:20px">&#128200; Entradas de Gain</div>
+          <div class="cmp-entries-grid" id="sops-entries-grid"></div>
+          <div class="cmp-sec-title" style="margin-top:14px">&#128201; Entradas de Loss</div>
+          <div class="cmp-entries-grid" id="sops-loss-grid"></div>
+          <div class="cmp-total-row">
+            <span>Resultado acumulado</span>
+            <strong id="sops-total-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Saldo Atual (Banca + Resultado)</span>
+            <strong id="sops-saldo-val">R$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Rendimento do dia (sobre a banca inicial)</span>
+            <strong id="sops-pct-ini">&#8212;</strong>
+          </div>
+          <div class="cmp-meta-bar-wrap">
+            <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="sops-meta-bar-fill"></div></div>
+            <div class="cmp-meta-bar-label" id="sops-meta-bar-label">Registre suas entradas para acompanhar</div>
+          </div>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta('sops')">&#8635; Reiniciar dia</button>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio (simula&#231;&#227;o) &#8212; Mini &#205;ndice (R$)</div>
+          <div class="rd-selectors">
+            <div class="rd-sel-field">
+              <label class="f-lbl">Ano</label>
+              <select class="stats-date-select" id="rd-swin-ano" onchange="changeRdPeriod('swin')"></select>
+            </div>
+            <div class="rd-sel-field">
+              <label class="f-lbl">M&#234;s</label>
+              <select class="stats-date-select" id="rd-swin-mes" onchange="changeRdPeriod('swin')"><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
+            </div>
+          </div>
+          <div class="rd-info" id="rd-swin-info"></div>
+          <div class="rd-grid" id="rd-swin-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Resultado do m&#234;s</span>
+            <strong id="rd-swin-total">R$ 0,00</strong>
+          </div>
+          <div class="rd-yield">
+            <div class="cmp-total-row">
+              <span>Rendimento no m&#234;s (sobre a banca inicial)</span>
+              <strong id="rd-swin-pct-mes">&#8212;</strong>
+            </div>
+            <div class="cmp-total-row">
+              <span>Acumulado (todos os meses)</span>
+              <strong id="rd-swin-pct-acum">&#8212;</strong>
+            </div>
+            <div class="rd-yield-hint" id="rd-swin-pct-hint">Preencha a Banca inicial no painel acima para ver quanto voc&#234; ganhou ou perdeu em %.</div>
+          </div>
+        </div>
+
+        <div class="cmp-card" style="margin-top:6px">
+          <div class="cmp-sim-tag">&#129514; Simula&#231;&#227;o &#8212; Opera&#231;&#245;es no Forex (US$)</div>
+          <div class="cmp-sec-title">&#127919; Meta e Limite do Dia</div>
+          <div class="cmp-meta-inputs-row">
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Data</label>
+              <input type="date" class="f-inp-valor cmp-meta-inp" id="sfx-data" style="text-transform:none" oninput="calcCmpMeta('sfx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca inicial (valor aportado)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sfx-banca-inicial" placeholder="0.00" step="0.01" min="0" oninput="onBancaInicialInput('sfx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Banca do Dia</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sfx-banca" placeholder="0.00" step="0.01" min="0" oninput="calcCmpMeta('sfx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Stop Loss (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sfx-stop-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('sfx')">
+            </div>
+            <div class="cmp-meta-field">
+              <label class="f-lbl">Meta Gain (%)</label>
+              <input type="number" class="f-inp-valor cmp-meta-inp" id="sfx-gain-pct" placeholder="0" step="0.1" min="0" oninput="calcCmpMeta('sfx')">
+            </div>
+          </div>
+          <div class="cmp-calc-row">
+            <div class="cmp-calc-box bear"><span>Limite de Perda</span><strong id="sfx-stop-val">US$ 0,00</strong></div>
+            <div class="cmp-calc-box bull"><span>Meta de Ganho</span><strong id="sfx-gain-val">US$ 0,00</strong></div>
+          </div>
+          <div class="cmp-sec-title" style="margin-top:20px">&#128200; Entradas de Gain</div>
+          <div class="cmp-entries-grid" id="sfx-entries-grid"></div>
+          <div class="cmp-sec-title" style="margin-top:14px">&#128201; Entradas de Loss</div>
+          <div class="cmp-entries-grid" id="sfx-loss-grid"></div>
+          <div class="cmp-total-row">
+            <span>Resultado acumulado</span>
+            <strong id="sfx-total-val">US$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Saldo Atual (Banca + Resultado)</span>
+            <strong id="sfx-saldo-val">US$ 0,00</strong>
+          </div>
+          <div class="cmp-total-row">
+            <span>Rendimento do dia (sobre a banca inicial)</span>
+            <strong id="sfx-pct-ini">&#8212;</strong>
+          </div>
+          <div class="cmp-meta-bar-wrap">
+            <div class="cmp-meta-bar"><div class="cmp-meta-bar-fill" id="sfx-meta-bar-fill"></div></div>
+            <div class="cmp-meta-bar-label" id="sfx-meta-bar-label">Registre suas entradas para acompanhar</div>
+          </div>
+          <button class="cmp-reset-btn" onclick="resetCmpMeta('sfx')">&#8635; Reiniciar dia</button>
+        </div>
+
+        <div class="cmp-card">
+          <div class="cmp-sec-title">&#128197; Resultado di&#225;rio (simula&#231;&#227;o) &#8212; Forex (US$)</div>
+          <div class="rd-selectors">
+            <div class="rd-sel-field">
+              <label class="f-lbl">Ano</label>
+              <select class="stats-date-select" id="rd-sfx-ano" onchange="changeRdPeriod('sfx')"></select>
+            </div>
+            <div class="rd-sel-field">
+              <label class="f-lbl">M&#234;s</label>
+              <select class="stats-date-select" id="rd-sfx-mes" onchange="changeRdPeriod('sfx')"><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Mar&#231;o</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
+            </div>
+          </div>
+          <div class="rd-info" id="rd-sfx-info"></div>
+          <div class="rd-grid" id="rd-sfx-grid"></div>
+          <div class="cmp-total-row" style="margin-top:12px">
+            <span>Resultado do m&#234;s</span>
+            <strong id="rd-sfx-total">US$ 0,00</strong>
+          </div>
+          <div class="rd-yield">
+            <div class="cmp-total-row">
+              <span>Rendimento no m&#234;s (sobre a banca inicial)</span>
+              <strong id="rd-sfx-pct-mes">&#8212;</strong>
+            </div>
+            <div class="cmp-total-row">
+              <span>Acumulado (todos os meses)</span>
+              <strong id="rd-sfx-pct-acum">&#8212;</strong>
+            </div>
+            <div class="rd-yield-hint" id="rd-sfx-pct-hint">Preencha a Banca inicial no painel acima para ver quanto voc&#234; ganhou ou perdeu em %.</div>
           </div>
         </div>
 
@@ -2218,6 +2391,8 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       loadAportes();
       loadResultadosMes('win');
       loadResultadosMes('fx');
+      loadResultadosMes('swin');
+      loadResultadosMes('sfx');
     }
     function renderEquity(chrono) {
       var pts = [0]; chrono.forEach(function(op) { pts.push(pts[pts.length-1] + (op.res === 'gain' ? 1 : -1)); });
@@ -3164,7 +3339,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     /* META E LIMITE DO DIA (nuvem: meta_limite_dia) */
     function fmtBRL(v) { return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function renderCmpEntriesGrid() {
-      ['cmp','ops','fx'].forEach(function(px) {
+      ['cmp','ops','fx','sops','sfx'].forEach(function(px) {
         var gGrid = document.getElementById(px + '-entries-grid');
         if (gGrid && !gGrid.dataset.built) {
           var gHtml = '';
@@ -3203,11 +3378,13 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       });
     }
     function loadCmpMetaFromCloud() {
-      return Promise.all([dbMetaGet(1), dbMetaGet(2)]).then(function(r) {
+      return Promise.all([dbMetaGet(1), dbMetaGet(2), dbMetaGet(3), dbMetaGet(4)]).then(function(r) {
         fillMetaFields(['cmp','ops'], (r[0] && r[0][0]) || {});
         fillMetaFields(['fx'], (r[1] && r[1][0]) || {});
-        updateRdYield('win'); updateRdYield('fx');
-        updatePanelYield('ops'); updatePanelYield('fx');
+        fillMetaFields(['sops'], (r[2] && r[2][0]) || {});
+        fillMetaFields(['sfx'], (r[3] && r[3][0]) || {});
+        updateRdYield('win'); updateRdYield('fx'); updateRdYield('swin'); updateRdYield('sfx');
+        updatePanelYield('ops'); updatePanelYield('fx'); updatePanelYield('sops'); updatePanelYield('sfx');
       }).catch(function(e) { showToast('Erro ao carregar meta do dia: ' + e.message, 'error'); });
     }
     function collectMeta(px) {
@@ -3237,11 +3414,26 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     var saveFxMetaDebounced = debounce(function() {
       dbMetaSet(collectMeta('fx'), 2).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
     }, 600);
-    function fmtMeta(px, v) { return (px === 'fx' ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    /* mapeamentos real x simulacao: px = prefixo dos campos (ops, fx, sops, sfx); m = mercado dos resultados diarios (win, fx, swin, sfx) */
+    function pxIsFx(px) { return px === 'fx' || px === 'sfx'; }
+    function pxIsSim(px) { return px === 'sops' || px === 'sfx'; }
+    function pxMetaId(px) { return { cmp: 1, ops: 1, fx: 2, sops: 3, sfx: 4 }[px] || 1; }
+    function pxToM(px) { return { cmp: 'win', ops: 'win', fx: 'fx', sops: 'swin', sfx: 'sfx' }[px] || 'win'; }
+    function mToPx(m) { return { win: 'ops', fx: 'fx', swin: 'sops', sfx: 'sfx' }[m] || 'ops'; }
+    function mIsFx(m) { return m === 'fx' || m === 'sfx'; }
+    var metaSimTimers = {};
+    function saveMetaSim(px) {
+      clearTimeout(metaSimTimers[px]);
+      metaSimTimers[px] = setTimeout(function() {
+        dbMetaSet(collectMeta(px), pxMetaId(px)).catch(function(e) { showToast('Erro ao salvar: ' + e.message, 'error'); });
+      }, 600);
+    }
+    function fmtMeta(px, v) { return (pxIsFx(px) ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function calcCmpMeta(px) {
       px = px || 'cmp';
-      var group = px === 'fx' ? ['fx'] : ['cmp','ops'];
-      var otherPx = px === 'fx' ? null : (px === 'cmp' ? 'ops' : 'cmp');
+      var standalone = pxIsFx(px) || pxIsSim(px);
+      var group = standalone ? [px] : ['cmp','ops'];
+      var otherPx = standalone ? null : (px === 'cmp' ? 'ops' : 'cmp');
       var fm = function(v) { return fmtMeta(px, v); };
       var banca = parseFloat(document.getElementById(px + '-banca').value) || 0;
       var stopPct = parseFloat(document.getElementById(px + '-stop-pct').value) || 0;
@@ -3321,15 +3513,15 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       });
 
       updatePanelYield(px);
-      if (px === 'fx') saveFxMetaDebounced(); else saveMetaDebounced();
+      if (pxIsSim(px)) saveMetaSim(px); else if (px === 'fx') saveFxMetaDebounced(); else saveMetaDebounced();
     }
     function resetCmpMeta(px) {
-      var isFx = px === 'fx';
-      showGenConfirm('Reiniciar o dia (' + (isFx ? 'Forex' : 'Mini \u00cdndice') + ')?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
+      var isFx = pxIsFx(px), isSim = pxIsSim(px);
+      showGenConfirm('Reiniciar o dia (' + (isSim ? 'simula\u00e7\u00e3o, ' : '') + (isFx ? 'Forex' : 'Mini \u00cdndice') + ')?', 'Isso vai apagar a banca, o stop, a meta de gain e todas as entradas do dia. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.', function() {
         setLoading(true);
-        dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] }, isFx ? 2 : 1)
+        dbMetaSet({ data: new Date().toISOString().slice(0,10), banca: null, stop_pct: null, gain_pct: null, gains: [], losses: [] }, isSim ? pxMetaId(px) : (isFx ? 2 : 1))
           .then(function() { return loadCmpMetaFromCloud(); })
-          .then(function() { calcCmpMeta(isFx ? 'fx' : 'cmp'); showToast('Dia reiniciado!', 'success'); })
+          .then(function() { calcCmpMeta(isSim ? px : (isFx ? 'fx' : 'cmp')); showToast('Dia reiniciado!', 'success'); })
           .catch(function(e) { showToast('Erro: ' + e.message, 'error'); })
           .finally(function() { setLoading(false); });
       });
@@ -3338,9 +3530,9 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     /* RESULTADO DIARIO POR MES (nuvem: resultados_diarios) */
     var RD_MESES = ['Janeiro','Fevereiro','Mar\u00e7o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     var RD_DIAS = ['dom','seg','ter','qua','qui','sex','s\u00e1b'];
-    var rdVals = { win: {}, fx: {} };
+    var rdVals = { win: {}, fx: {}, swin: {}, sfx: {} };
     function updatePanelYield(px) {
-      var key = px === 'fx' ? 'fx' : 'ops';
+      var key = (px === 'fx' || px === 'sfx' || px === 'sops') ? px : 'ops';
       var el = document.getElementById(key + '-pct-ini'), bi = document.getElementById(key + '-banca-inicial');
       if (!el || !bi) return;
       var base = parseFloat(bi.value);
@@ -3364,17 +3556,17 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       });
       return Promise.all(ps);
     }
-    var rdOutside = { win: null, fx: null };
+    var rdOutside = { win: null, fx: null, swin: null, sfx: null };
     var bancaInicialTimers = {};
     function onBancaInicialInput(px) {
       var el = document.getElementById(px + '-banca-inicial');
       if (!el) return;
-      updateRdYield(px === 'fx' ? 'fx' : 'win');
+      updateRdYield(pxToM(px));
       updatePanelYield(px);
       var v = parseFloat(el.value);
       clearTimeout(bancaInicialTimers[px]);
       bancaInicialTimers[px] = setTimeout(function() {
-        dbMetaSet({ banca_inicial: isNaN(v) ? null : v }, px === 'fx' ? 2 : 1)
+        dbMetaSet({ banca_inicial: isNaN(v) ? null : v }, pxMetaId(px))
           .catch(function(e) { showToast('Erro ao salvar a banca inicial: ' + e.message, 'error'); });
       }, 600);
     }
@@ -3401,7 +3593,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       return total;
     }
     function updateRdYield(m) {
-      var px = m === 'fx' ? 'fx' : 'ops';
+      var px = mToPx(m);
       var bi = document.getElementById(px + '-banca-inicial');
       var elMes = document.getElementById('rd-' + m + '-pct-mes'), elAc = document.getElementById('rd-' + m + '-pct-acum'), hint = document.getElementById('rd-' + m + '-pct-hint');
       if (!bi || !elMes || !elAc) return;
@@ -3421,7 +3613,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       elAc.textContent = rdSigned(m, ac) + ' (' + rdPct(ac / base * 100) + ')';
       elAc.className = ac > 0 ? 'pos' : (ac < 0 ? 'neg' : '');
     }
-    function rdFmt(m, v) { return (m === 'fx' ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function rdFmt(m, v) { return (mIsFx(m) ? 'US$ ' : 'R$ ') + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function rdPad(n) { return n < 10 ? '0' + n : '' + n; }
     function rdSel(m) {
       var a = document.getElementById('rd-' + m + '-ano'), me = document.getElementById('rd-' + m + '-mes');
@@ -3432,7 +3624,7 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
     }
     function initRdSelectors() {
       var now = new Date(), y = now.getFullYear();
-      ['win','fx'].forEach(function(m) {
+      ['win','fx','swin','sfx'].forEach(function(m) {
         var a = document.getElementById('rd-' + m + '-ano'), me = document.getElementById('rd-' + m + '-mes');
         if (!a || !me) return;
         var h = '';
@@ -3678,6 +3870,8 @@ create policy "acesso_publico_ganhos_forex" on ganhos_mensais_forex
       return Promise.all([loadCmpMetaFromCloud(), loadMetamesFromCloud(), loadGanhosFromCloud()]).then(function() {
         calcCmpMeta('cmp');
         calcCmpMeta('fx');
+        calcCmpMeta('sops');
+        calcCmpMeta('sfx');
         renderCmpMetasMes();
         renderGanhosMensais();
       });
